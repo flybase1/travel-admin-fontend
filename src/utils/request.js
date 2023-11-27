@@ -23,14 +23,14 @@ const httpService = axios.create({
 httpService.interceptors.request.use(
   function (config) {
     // 在发送请求之前做些什么
-    console.log("store=" + store.getters.GET_TOKEN);
-    config.headers["token"] = store.getters.GET_TOKEN;
-    // console.log(sessionStorage.getItem("token"));
-    // config.headers.token = sessionStorage.getItem("token");
-    /*config.headers["Content-Type"] = 'application/json'*/
+    // console.log("store=" + store.getters.GET_TOKEN);
+    // config.headers["token"] = store.getters.GET_TOKEN;
+    // config.headers["Content-Type"] = "application/json";
+    console.log(sessionStorage.getItem("token"));
+    config.headers.token = sessionStorage.getItem("token");
     /*console.log("store=" + store.GET_TOKEN)*/
     /*console.log("store="+store.GET_TOKEN)
-                config.headers.token=store.GET_TOKEN*/
+    config.headers.token=store.GET_TOKEN*/
     return config;
   },
   function (error) {

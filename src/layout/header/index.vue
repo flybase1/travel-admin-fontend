@@ -15,7 +15,7 @@ import Avatar from "@/layout/header/components/avatar.vue";
 <style lang="scss" scoped>
 .navbar {
   width: 100%;
-  height: 70px;
+  height: 55px;
   overflow: hidden;
   background-color: azure;
   box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);

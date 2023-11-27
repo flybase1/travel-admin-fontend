@@ -15,6 +15,8 @@ router.beforeEach((to, from, next) => {
     if (!hasRoutes) {
       bindRoute(menuList);
       store.commit("SET_ROUTES_STATE", true);
+      // next({ path: "/index" });
+      next({ ...to, replace: true });
     }
     next();
   } else {
@@ -22,19 +24,32 @@ router.beforeEach((to, from, next) => {
     if (whiteList.includes(to.path)) {
       next();
     } else {
-      // 否则挑战主页
+      // 否则跳转主页
       next("/login");
     }
   }
 });
 
-// 动态路由
+// function bindRoute(menuList) {
+//   menuList.forEach((menu) => {
+//     if (menu.children) {
+//       menu.children.forEach((m) => {
+//         const route = menuToRoute(m, menu.menuName);
+//         if (route) {
+//           router.addRoute(route);
+//         }
+//       });
+//     }
+//   });
+// }
+
+//动态路由
 const bindRoute = (menuList) => {
   const newRoutes = router.options.routes;
   menuList.forEach((menu) => {
     if (menu.children) {
       menu.children.forEach((m) => {
-        let route = menuToRoute(m, menu.menuName);
+        const route = menuToRoute(m, menu.menuName);
         if (route) {
           newRoutes[0].children.push(route);
         }
@@ -58,7 +73,7 @@ const menuToRoute = (menu, parentName) => {
       meta: { parentName: parentName },
     };
     route.component = () => import("../views/" + menu.component + ".vue");
-    console.log(route);
+    //console.log(route);
     return route;
   }
 };

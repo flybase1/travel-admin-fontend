@@ -1,15 +1,17 @@
 <template>
   <el-dropdown>
     <span class="el-dropdown-link">
-      <el-avatar shape="square" :size="50" :src="currentUser.userAvatar" />
-      &nbsp;&nbsp;{{ currentUser.username }}
+      <el-avatar shape="square" :size="50" :src="userAvatar" />
+      &nbsp;&nbsp;{{ userName }}
       <el-icon class="el-icon--right">
         <arrow-down />
       </el-icon>
     </span>
     <template #dropdown>
       <el-dropdown-menu>
-        <el-dropdown-item>个人中心</el-dropdown-item>
+        <el-dropdown-item>
+          <router-link :to="{ name: '个人中心' }">用户中心</router-link>
+        </el-dropdown-item>
         <el-dropdown-item @click="logout">安全退出</el-dropdown-item>
       </el-dropdown-menu>
     </template>
@@ -20,8 +22,14 @@ import store from "@/store";
 import { ArrowDown } from "@element-plus/icons-vue";
 import requestUtil from "@/utils/request";
 import { ElMessage } from "element-plus";
+import { watch } from "vue";
 
 const currentUser = store.getters.GET_USER_INFO;
+const userAvatar =
+  currentUser == null
+    ? "https://picsum.photos/200/300"
+    : currentUser.userAvatar;
+const userName = currentUser == null ? "未登录" : currentUser.username;
 
 const logout = async () => {
   const res = await requestUtil.get("/logout");

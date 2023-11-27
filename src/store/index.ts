@@ -20,7 +20,7 @@ export default createStore({
   },
   mutations: {
     SET_TOKEN: (state, token) => {
-      localStorage.setItem("token", token);
+      //localStorage.setItem("token", token);
       sessionStorage.setItem("token", token);
     },
     SET_MENU_LIST: (state, menuList) => {

@@ -8,10 +8,13 @@ import "element-plus/dist/index.css";
 // @ts-ignore
 import SvgIcon from "@/icons";
 import "@/router/permission.js";
+import zhCn from "element-plus/es/locale/lang/zh-cn";
 
 const app = createApp(App);
 SvgIcon(app);
-app.use(ElementPlus);
+app.use(ElementPlus, {
+  locale: zhCn,
+});
 app.use(store);
 app.use(router);
 app.mount("#app");
