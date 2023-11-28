@@ -30,7 +30,7 @@ httpService.interceptors.request.use(
     config.headers.token = sessionStorage.getItem("token");
     /*console.log("store=" + store.GET_TOKEN)*/
     /*console.log("store="+store.GET_TOKEN)
-    config.headers.token=store.GET_TOKEN*/
+                config.headers.token=store.GET_TOKEN*/
     return config;
   },
   function (error) {
@@ -99,6 +99,42 @@ export function post(url, params = {}) {
   });
 }
 
+export function put(url, params = {}) {
+  return new Promise((resolve, reject) => {
+    httpService({
+      url: url,
+      method: "put",
+      data: params,
+    })
+      .then((response) => {
+        console.log(response);
+        resolve(response);
+      })
+      .catch((error) => {
+        console.log(error);
+        reject(error);
+      });
+  });
+}
+
+export function deleteR(url, params = {}) {
+  return new Promise((resolve, reject) => {
+    httpService({
+      url: url,
+      method: "delete",
+      data: params,
+    })
+      .then((response) => {
+        console.log(response);
+        resolve(response);
+      })
+      .catch((error) => {
+        console.log(error);
+        reject(error);
+      });
+  });
+}
+
 /*
  *  文件上传
  *  url:请求地址
@@ -128,6 +164,8 @@ export function getServerUrl() {
 export default {
   get,
   post,
+  put,
+  deleteR,
   fileUpload,
   getServerUrl,
 };
