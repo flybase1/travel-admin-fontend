@@ -106,8 +106,15 @@ const handleLogin = () => {
           store.commit("SET_TOKEN", res.data.data.authorization);
           store.commit("SET_MENU_LIST", res.data.data.menuList);
           store.commit("SET_USER_INFO", res.data.data.user);
-          console.log(res.data.data.menuList);
+          // console.log(res.data.data.menuList);
+          // setTimeout(async () => {
+          //   //需要延迟的代码 :3秒后延迟跳转到首页，可以加提示什么的
+          //   await router.push("/index");
+          //   //延迟时间：1秒
+          // }, 1000);
+
           await router.push("/index");
+          window.location.reload();
         } else {
           ElMessage.error(res.data);
         }

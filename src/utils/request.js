@@ -26,7 +26,7 @@ httpService.interceptors.request.use(
     // console.log("store=" + store.getters.GET_TOKEN);
     // config.headers["token"] = store.getters.GET_TOKEN;
     // config.headers["Content-Type"] = "application/json";
-    console.log(sessionStorage.getItem("token"));
+    //console.log(sessionStorage.getItem("token"));
     config.headers.token = sessionStorage.getItem("token");
     /*console.log("store=" + store.GET_TOKEN)*/
     /*console.log("store="+store.GET_TOKEN)

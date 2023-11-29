@@ -63,7 +63,7 @@ const formRef = ref(null);
 
 const initFormData = async (accountPId) => {
   const res = await requestUtil.get("sysRole/listAll");
-  console.log("----->" + res.data);
+  // console.log("----->" + res.data);
   form.value.roleList = res.data.data;
   form.value.accountId = accountPId;
 };
@@ -82,7 +82,7 @@ watch(
   }
 );
 
-const emits = defineEmits(["update:modelValue", "initUserList"]);
+const emits = defineEmits(["update:modelValue", "initAccountList"]);
 
 const handleClose = () => {
   emits("update:modelValue", false);

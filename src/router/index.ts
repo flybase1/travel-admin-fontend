@@ -18,6 +18,11 @@ const routes: Array<RouteRecordRaw> = [
         name: "个人中心",
         component: () => import("../views/userCenter/index.vue"),
       },
+      {
+        path: "/test",
+        name: "test",
+        component: () => import("../views/sys/account/index.vue"),
+      },
     ],
   },
   {
