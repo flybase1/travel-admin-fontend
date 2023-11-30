@@ -47,6 +47,14 @@
         <el-input v-model="form.component" />
       </el-form-item>
 
+      <el-form-item label="路由地址" prop="menuPath">
+        <el-input v-model="form.menuPath" />
+      </el-form-item>
+
+      <el-form-item label="备注" prop="remark">
+        <el-input v-model="form.remark" />
+      </el-form-item>
+
       <el-form-item label="显示顺序" prop="orderNum">
         <el-input-number
           v-model="form.orderNum"
@@ -103,6 +111,8 @@ const form = ref({
   perms: "",
   component: "",
   orderNum: 1,
+  remark: "",
+  menuPath: "",
 });
 
 const rules = ref({
@@ -134,6 +144,8 @@ watch(
         perms: "",
         component: "",
         orderNum: 1,
+        remark: "",
+        menuPath: "",
       };
     }
   }
@@ -162,7 +174,7 @@ const handleConfirm = () => {
         }
         console.log(result.data);
       } else {
-        result = await requestUtil.put("/sysRole/updateMenu", form.value);
+        result = await requestUtil.put("/sysMenu/updateMenu", form.value);
         if (result.data.code === 0) {
           ElMessage.success("修改成功！");
           formRef.value.resetFields();

@@ -3,12 +3,12 @@
     <el-button type="success" :icon="DocumentAdd" @click="handleDialogValue()"
       >新增
     </el-button>
+    <!--      default-expand-all  -->
     <el-table
       :data="tableData"
       row-key="id"
       stripe
       border
-      default-expand-all
       style="width: 100%"
       :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
     >

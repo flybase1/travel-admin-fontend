@@ -92,7 +92,12 @@
         align="center"
       >
         <template v-slot="scope">
-          <el-button type="primary" :icon="User">查看信息</el-button>
+          <el-button
+            type="primary"
+            :icon="User"
+            @click="handleUserInfoDialogValue(scope.row.accountId)"
+            >查看信息
+          </el-button>
           <el-button
             type="primary"
             :icon="Tools"
@@ -160,6 +165,12 @@
     :roleDialogVisible="roleDialogVisible"
     @initAccountList="initAccountList"
   ></RoleDialog>
+  <user-info-dialog
+    v-model="userInfoDialogVisible"
+    :accountId="accountId"
+    :userInfoDialogVisible="userInfoDialogVisible"
+    @initAccountList="initAccountList"
+  ></user-info-dialog>
 </template>
 <script setup lang="ts">
 import { ref } from "vue";
@@ -176,6 +187,7 @@ import {
 import Dialog from "./components/dialog.vue";
 import RoleDialog from "./components/roleDialog.vue";
 import { ElMessage } from "element-plus";
+import UserInfoDialog from "@/views/sys/account/components/userInfoDialog.vue";
 
 const tableData = ref([
   {
@@ -211,7 +223,7 @@ const multipleSelection = ref([]);
 
 const sysRoleList = ref([]);
 const roleDialogVisible = ref(false);
-
+const userInfoDialogVisible = ref(false);
 const initAccountList = async () => {
   const res = await requestUtil.post("/account/page", queryForm.value);
   //console.log("accountList===>", ...res.data.data.records);
@@ -322,6 +334,12 @@ const handleRoleDialogValue = (id: number, roleList) => {
   accountId.value = id;
   sysRoleList.value = roleList;
   roleDialogVisible.value = true;
+};
+
+const handleUserInfoDialogValue = (id: number) => {
+  // console.log("accountId=" + id);
+  accountId.value = id;
+  userInfoDialogVisible.value = true;
 };
 </script>
 

@@ -60,7 +60,7 @@ const refreshTabs = () => {
 };
 
 const clickTab = (target) => {
-  console.log("target.props.label=" + target.props.label);
+  //console.log("target.props.label=" + target.props.label);
   router.push({ name: target.props.label });
 };
 

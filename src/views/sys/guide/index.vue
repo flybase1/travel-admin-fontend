@@ -3,26 +3,19 @@
     <el-row :gutter="20" class="header">
       <el-col :span="7">
         <el-input
-          placeholder="输入用户名"
-          v-model="queryForm.queryUserName"
+          placeholder="审核状态"
+          v-model="queryForm.queryApprovalStatus"
           clearable
         ></el-input>
       </el-col>
       <el-col :span="7">
         <el-input
-          placeholder="输入地区"
-          v-model="queryForm.queryUserRegion"
+          placeholder="导游评分"
+          v-model="queryForm.queryScore"
           clearable
         ></el-input>
       </el-col>
-      <el-col :span="7">
-        <el-input
-          placeholder="输入状态"
-          v-model="queryForm.queryUserStatus"
-          clearable
-        ></el-input>
-      </el-col>
-      <el-button type="primary" :icon="Search" @click="initUserList"
+      <el-button type="primary" :icon="Search" @click="initGuideList"
         >搜索
       </el-button>
     </el-row>
@@ -33,24 +26,19 @@
       @selectionChange="handleSelectionChange"
     >
       <el-table-column type="selection" width="55" />
-      <el-table-column prop="userId" label="用户id" width="90" sortable />
-      <el-table-column prop="userAccount" label="账号名" width="100" />
-      <el-table-column prop="username" label="用户名" width="100" />
+      <el-table-column prop="guideId" label="导游id" width="90" sortable />
+      <el-table-column prop="userAccount" label="账号名" width="120" />
+      <el-table-column prop="username" label="用户名" width="120" />
       <el-table-column prop="userAvatar" label="头像" width="130">
         <template v-slot="scope"
           ><img :src="scope.row.userAvatar" width="50" height="50"
         /></template>
       </el-table-column>
-      <el-table-column prop="userAge" label="年龄" width="60" />
-      <el-table-column prop="userGender" label="性别" width="60">
-        <template v-slot="{ row }">
-          {{
-            row.userGender === 0 ? "男" : row.userGender === 1 ? "女" : "未知"
-          }}
-        </template>
+      <el-table-column prop="guideCertificate" label="导游证明" width="180" />
+      <el-table-column prop="approvalStatus" label="审核状态" width="100">
       </el-table-column>
-      <el-table-column prop="userRegion" label="地区" width="160" />
-      <el-table-column prop="userProfile" label="个人简介" width="160" />
+      <el-table-column prop="score" label="导游评分" width="60" />
+      <el-table-column prop="approvalResult" label="失败原因" width="120" />
       <el-table-column prop="createTime" label="创建时间" width="160" />
       <el-table-column
         prop="action"
@@ -64,8 +52,18 @@
             v-if="scope.row.userAccount != 'admin'"
             type="primary"
             :icon="Edit"
-            @click="handleDialogValue(scope.row.accountId)"
+            @click="handleDialogValue(scope.row.guideId)"
           ></el-button>
+          <!-- 删除         -->
+          <el-popconfirm
+            v-if="scope.row.userAccount != 'admin'"
+            title="您确定要删除这条记录吗？"
+            @confirm="handleDelete(scope.row.guideId)"
+          >
+            <template #reference>
+              <el-button type="danger" :icon="Delete" />
+            </template>
+          </el-popconfirm>
         </template>
       </el-table-column>
     </el-table>
@@ -85,9 +83,9 @@
   <Dialog
     v-model="dialogVisible"
     :dialogVisible="dialogVisible"
-    :userId="userId"
+    :guide-id="guideId"
     :dialogTitle="dialogTitle"
-    @initUserList="initUserList"
+    @initGuideList="initGuideList"
     @update:modelValue="dialogVisible = $event"
   ></Dialog>
 </template>
@@ -100,24 +98,21 @@ import { ElMessage } from "element-plus";
 
 const tableData = ref([
   {
-    userId: 1,
-    username: "test",
-    userAvatar: "https://picsum.photos/200/300",
-    userAge: "ddd",
-    userRegion: "北京",
-    userProfile: "个人介绍",
-    userGender: 0,
-    userStatus: 0,
+    guideId: 1,
     userAccount: "test",
+    guideCertificate: "test",
+    userAvatar: "https://picsum.photos/200/300",
+    approvalStatus: 0,
+    score: 5,
+    username: "test",
     createTime: "1111",
+    approvalResult: "ok",
   },
 ]);
 
 const queryForm = ref({
-  queryUserName: "",
-  queryUserGender: "",
-  queryUserStatus: "",
-  queryUserRegion: "",
+  queryApprovalStatus: "",
+  queryScore: "",
   current: 1,
   pageSize: 10,
 });
@@ -128,37 +123,35 @@ const background = ref(false);
 const disabled = ref(false);
 const dialogVisible = ref(false);
 const dialogTitle = ref("");
-const userId = ref(-1);
+const guideId = ref(-1);
 // 定义选中的行
 const multipleSelection = ref([]);
 
-const sysRoleList = ref([]);
-const roleDialogVisible = ref(false);
-
-const initUserList = async () => {
-  const res = await requestUtil.post("/user/pageUser", queryForm.value);
+const initGuideList = async () => {
+  const res = await requestUtil.post("/guide/guidePage", queryForm.value);
   tableData.value = res.data.data.records;
   total.value = res.data.data.total;
 };
 
-initUserList();
+initGuideList();
 
 const handleSizeChange = (pageSize: number) => {
   queryForm.value.current = 1;
   queryForm.value.pageSize = pageSize;
-  initUserList();
+  initGuideList();
 };
 const handleCurrentChange = (current: number) => {
   queryForm.value.current = current;
-  initUserList();
+  initGuideList();
 };
 
 const handleDialogValue = (id: any) => {
+  // console.log(id);
   if (id) {
-    userId.value = id;
-    dialogTitle.value = "用户修改";
+    guideId.value = id;
+    dialogTitle.value = "导游修改";
   } else if (id === undefined) {
-    userId.value = -1;
+    guideId.value = -1;
     dialogTitle.value = "用户添加";
   }
   dialogVisible.value = true;
@@ -167,8 +160,27 @@ const handleDialogValue = (id: any) => {
 const delBtnStatus = ref(true);
 
 const handleSelectionChange = (selection: []) => {
+  // console.log(selection);
   multipleSelection.value = selection;
   delBtnStatus.value = selection.length == 0;
+};
+
+const handleDelete = async (id: number) => {
+  // var ids = [];
+  // if (id) {
+  //   ids.push(id);
+  // } else {
+  //   multipleSelection.value.forEach((row) => {
+  //     ids.push(row.guideId);
+  //   });
+  // }
+  const res = await requestUtil.deleteR("/guide/deleteGuide?guideId", id);
+  if (res.data.code === 0) {
+    ElMessage({ type: "success", message: "执行成功" });
+    initGuideList();
+  } else {
+    ElMessage.error({ type: "error", message: "删除失败" });
+  }
 };
 </script>
 

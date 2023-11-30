@@ -22,7 +22,6 @@ import store from "@/store";
 import { ArrowDown } from "@element-plus/icons-vue";
 import requestUtil from "@/utils/request";
 import { ElMessage } from "element-plus";
-import { watch } from "vue";
 
 const currentUser = store.getters.GET_USER_INFO;
 const userAvatar =
@@ -33,7 +32,7 @@ const userName = currentUser == null ? "未登录" : currentUser.username;
 
 const logout = async () => {
   const res = await requestUtil.get("/logout");
-  console.log(res.data);
+  //console.log(res.data);
   if (res.data.code === 0) {
     // 移除路由
     store.commit("SET_ROUTES_STATE", false);

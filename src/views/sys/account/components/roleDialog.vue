@@ -98,7 +98,7 @@ const handleConfirm = () => {
       console.log(result.data);
       if (result.data.code === 0) {
         ElMessage.success("执行成功！");
-        emits("initUserList");
+        emits("initAccountList");
         handleClose();
       } else {
         ElMessage.error("执行失败");

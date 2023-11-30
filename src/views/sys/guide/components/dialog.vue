@@ -14,23 +14,20 @@
         <el-input v-model="form.username" />
       </el-form-item>
 
-      <el-form-item label="年龄" prop="userAge">
-        <el-input v-model="form.userAge" :disabled="true" type="number" />
+      <el-form-item label="导游材料" prop="guideCertificate">
+        <el-input v-model="form.guideCertificate" />
       </el-form-item>
 
-      <el-form-item label="地区" prop="userRegion">
-        <el-input v-model="form.userRegion" :disabled="true" />
+      <el-form-item label="审核状态" prop="approvalStatus">
+        <el-input v-model="form.approvalStatus" />
       </el-form-item>
 
-      <el-form-item label="性别" prop="userGender" :disabled="true">
-        <el-radio-group v-model="form.userGender">
-          <el-radio :label="'0'">男</el-radio>
-          <el-radio :label="'1'">女</el-radio>
-        </el-radio-group>
+      <el-form-item label="审核失败原因" prop="approvalResult">
+        <el-input v-model="form.approvalResult" />
       </el-form-item>
 
-      <el-form-item label="个人介绍" prop="userProfile">
-        <el-input v-model="form.userProfile" type="textarea" :rows="4" />
+      <el-form-item label="评分" prop="score">
+        <el-input v-model="form.score" />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -48,7 +45,7 @@ import requestUtil from "@/utils/request";
 import { ElMessage } from "element-plus";
 
 const props = defineProps({
-  userId: {
+  guideId: {
     type: Number,
     default: -1,
     required: true,
@@ -66,15 +63,16 @@ const props = defineProps({
 });
 
 const form = ref({
-  userId: -1,
+  guideId: -1,
   username: "",
   userAvatar: "",
-  userAge: 0,
-  userRegion: "",
-  userProfile: "",
-  userGender: 1,
+  guideCertificate: "",
+  approvalStatus: 0,
+  score: 5,
   userAccount: "1",
+  approvalResult: "",
 });
+
 const rules = ref({
   userAccount: [
     { required: true, message: "请输入账号名" },
@@ -106,33 +104,35 @@ const rules = ref({
 const formRef = ref(null);
 
 const initFormData = async (id) => {
-  const res = await requestUtil.get("/user/getUserInfo?userId=" + id);
+  //console.log("id===>" + id);
+  const res = await requestUtil.get("/guide/getGuideInfo?guideId=" + id);
+  //console.log(res.data);
   form.value = res.data.data;
 };
 
 watch(
   () => props.dialogVisible,
   () => {
-    let userIdP = props.userId;
-    //console.log("id=" + userIdP);
-    if (userIdP !== -1) {
-      initFormData(userIdP);
+    let guideIdP = props.guideId;
+    //console.log("id=" + guideIdP);
+    if (guideIdP !== -1) {
+      initFormData(guideIdP);
     } else {
       form.value = {
-        userId: -1,
+        guideId: -1,
         username: "",
         userAvatar: "",
-        userAge: 0,
-        userRegion: "",
-        userProfile: "",
-        userGender: 1,
-        userAccount: 1,
+        guideCertificate: "",
+        approvalStatus: 0,
+        score: 5,
+        userAccount: "sss",
+        approvalResult: "",
       };
     }
   }
 );
 
-const emits = defineEmits(["update:modelValue", "initUserList"]);
+const emits = defineEmits(["update:modelValue", "initGuideList"]);
 
 const handleClose = () => {
   emits("update:modelValue", false);
@@ -143,25 +143,14 @@ const handleConfirm = () => {
   formRef.value.validate(async (valid) => {
     if (valid) {
       let result;
-      //console.log(form.value.userId);
-      if (form.value.userId === -1) {
+      console.log(form.value.guideId);
+      if (form.value.guideId !== -1) {
         // 复用创建账号
-        result = await requestUtil.post("/account/saveAccount", form.value);
-        if (result.data.code === 0) {
-          ElMessage.success("添加成功！");
-          formRef.value.resetFields();
-          emits("initUserList");
-          handleClose();
-        } else {
-          ElMessage.error("添加失败");
-        }
-        console.log(result.data);
-      } else {
-        result = await requestUtil.put("/user/updateUser", form.value);
+        result = await requestUtil.put("/guide/updateGuide", form.value);
         if (result.data.code === 0) {
           ElMessage.success("修改成功！");
           formRef.value.resetFields();
-          emits("initUserList");
+          emits("initGuideList");
           handleClose();
         } else {
           ElMessage.error("修改失败");
