@@ -13,6 +13,11 @@ function resolve(dir) {
 module.exports = {
   lintOnSave: false,
 
+  devServer: {
+    client: {
+      overlay: true,
+    },
+  },
   chainWebpack(config) {
     // 创建命名规则
     config.module

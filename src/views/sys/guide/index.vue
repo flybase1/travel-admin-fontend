@@ -2,11 +2,20 @@
   <div class="app-container">
     <el-row :gutter="20" class="header">
       <el-col :span="7">
-        <el-input
-          placeholder="审核状态"
+        <el-select
           v-model="queryForm.queryApprovalStatus"
+          class="m-2"
+          placeholder="审核状态"
           clearable
-        ></el-input>
+          size="large"
+        >
+          <el-option
+            v-for="item in options"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
       </el-col>
       <el-col :span="7">
         <el-input
@@ -34,8 +43,26 @@
           ><img :src="scope.row.userAvatar" width="50" height="50"
         /></template>
       </el-table-column>
-      <el-table-column prop="guideCertificate" label="导游证明" width="180" />
+      <el-table-column
+        prop="guideCertificate"
+        label="导游证明"
+        width="180"
+      ></el-table-column>
       <el-table-column prop="approvalStatus" label="审核状态" width="100">
+        <template v-slot="scope">
+          <span style="color: gray" v-if="scope.row.approvalStatus === 0"
+            >等待审核</span
+          >
+          <span
+            style="color: deepskyblue"
+            v-else-if="scope.row.approvalStatus === 1"
+          >
+            审核成功
+          </span>
+          <span style="color: red" v-else-if="scope.row.approvalStatus === 2">
+            审核失败
+          </span>
+        </template>
       </el-table-column>
       <el-table-column prop="score" label="导游评分" width="60" />
       <el-table-column prop="approvalResult" label="失败原因" width="120" />
@@ -95,6 +122,21 @@ import requestUtil from "@/utils/request";
 import { Delete, DocumentAdd, Edit, Search } from "@element-plus/icons-vue";
 import Dialog from "./components/dialog.vue";
 import { ElMessage } from "element-plus";
+
+const options = [
+  {
+    value: "0",
+    label: "待审核",
+  },
+  {
+    value: "1",
+    label: "审核成功",
+  },
+  {
+    value: "2",
+    label: "审核失败",
+  },
+];
 
 const tableData = ref([
   {

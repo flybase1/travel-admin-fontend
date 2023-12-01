@@ -1,6 +1,9 @@
 // 引入axios
 import axios from "axios";
 import store from "@/store";
+import router from "@/router";
+import { Message } from "@element-plus/icons-vue";
+import { ElMessage } from "element-plus";
 
 /*import {XCStore} from "../store/XCStore.js"
 
@@ -30,12 +33,18 @@ httpService.interceptors.request.use(
     config.headers.token = sessionStorage.getItem("token");
     /*console.log("store=" + store.GET_TOKEN)*/
     /*console.log("store="+store.GET_TOKEN)
-                config.headers.token=store.GET_TOKEN*/
+                                                                                            config.headers.token=store.GET_TOKEN*/
     return config;
   },
   function (error) {
-    console.log("error:", error);
+    //console.log("error:", error);
     // 对请求错误做些什么
+    const res = error.response.data;
+    console.log(res);
+    if (res.code === 40102) {
+      console.log(res.message);
+      ElMessage.error(res.message);
+    }
     return Promise.reject(error);
   }
 );
@@ -49,6 +58,24 @@ httpService.interceptors.response.use(
   },
   function (error) {
     // 对响应错误做点什么
+    //console.log("response error==>", error.response);
+
+    const res = error.response.data;
+    console.log(res);
+    if (res.code === 40102) {
+      console.log(res.message);
+      ElMessage.error(res.message);
+      router.push("/login");
+    }
+    // if (error.response && error.response.status === 500) {
+    //   Message.error("token已经过期,请先登录!");
+    //   setTimeout(() => {
+    //     // router.push("/login");
+    //   }, 1000);
+    //}
+    // if (error.code === 500) {
+    //   ElMessage.error(error.data.message);
+    // }
     return Promise.reject(error);
   }
 );

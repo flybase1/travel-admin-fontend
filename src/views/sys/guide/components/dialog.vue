@@ -3,31 +3,51 @@
   <el-dialog :title="dialogTitle" width="30%" @close="handleClose">
     <!--:rules="rules"    -->
     <el-form ref="formRef" :model="form" label-width="100px">
-      <el-form-item label="头像" prop="userAvatar" align="center">
-        <el-avatar :src="form.userAvatar" align="center" />
-      </el-form-item>
-
       <el-form-item label="账号名" prop="userAccount">
         <el-input v-model="form.userAccount" :disabled="true" />
       </el-form-item>
       <el-form-item label="用户昵称" prop="username">
-        <el-input v-model="form.username" />
+        <el-input v-model="form.username" :disabled="true" />
       </el-form-item>
 
       <el-form-item label="导游材料" prop="guideCertificate">
         <el-input v-model="form.guideCertificate" />
       </el-form-item>
-
-      <el-form-item label="审核状态" prop="approvalStatus">
-        <el-input v-model="form.approvalStatus" />
+      <!--      :placeholder="-->
+      <!--      form.approvalStatus === '1'-->
+      <!--      ? '待审核'-->
+      <!--      : form.approvalStatus === '2'-->
+      <!--      ? '审核成功'-->
+      <!--      : form.approvalStatus === '3'-->
+      <!--      ? '审核失败'-->
+      <!--      : ''-->
+      <!--      "-->
+      <el-form-item label="审核状态">
+        <el-select v-model="selectStatus.value" clearable size="large">
+          <el-option
+            v-for="item in options"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          >
+          </el-option>
+        </el-select>
       </el-form-item>
 
       <el-form-item label="审核失败原因" prop="approvalResult">
-        <el-input v-model="form.approvalResult" />
+        <el-input v-model="form.approvalResult" :rows="4" type="textarea" />
       </el-form-item>
 
-      <el-form-item label="评分" prop="score">
-        <el-input v-model="form.score" />
+      <el-form-item label="评分" prop="score" align="center">
+        <el-input
+          v-model="form.score"
+          type="number"
+          max="5"
+          min="0"
+          size="large"
+          style="width: 100px"
+          :readonly="true"
+        />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -43,6 +63,21 @@
 import { defineEmits, defineProps, ref, watch } from "vue";
 import requestUtil from "@/utils/request";
 import { ElMessage } from "element-plus";
+
+const options = [
+  {
+    value: "0",
+    label: "待审核",
+  },
+  {
+    value: "1",
+    label: "审核成功",
+  },
+  {
+    value: "2",
+    label: "审核失败",
+  },
+];
 
 const props = defineProps({
   guideId: {
@@ -103,11 +138,17 @@ const rules = ref({
 
 const formRef = ref(null);
 
+const selectStatus = ref({ value: "0" });
+
 const initFormData = async (id) => {
   //console.log("id===>" + id);
   const res = await requestUtil.get("/guide/getGuideInfo?guideId=" + id);
   //console.log(res.data);
   form.value = res.data.data;
+  selectStatus.value.value = form.value.approvalStatus.toString();
+  // console.log(selectStatus.value);
+  // console.log(form.value.approvalStatus);
+  // console.log(typeof form.value.approvalStatus);
 };
 
 watch(
