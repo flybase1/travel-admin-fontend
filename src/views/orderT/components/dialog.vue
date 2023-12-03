@@ -1,24 +1,20 @@
 <template>
-  <!--    v-model="dialogVisible"  -->
   <el-dialog :title="dialogTitle" width="30%" @close="handleClose">
     <el-form ref="formRef" :model="form" label-width="100px">
-      <el-form-item label="用户名" prop="userAccount">
-        <el-input v-model="form.userAccount" :disabled="true" />
+      <el-form-item label="订单状态">
+        <el-select v-model="selectOrderStatus" clearable size="large">
+          <el-option
+            v-for="item in options"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          >
+          </el-option>
+        </el-select>
       </el-form-item>
 
-      <el-form-item label="手机号" prop="userPhoneNum">
-        <el-input v-model="form.userPhoneNum" />
-      </el-form-item>
-
-      <el-form-item label="邮箱" prop="userEmail">
-        <el-input v-model="form.userEmail" />
-      </el-form-item>
-
-      <el-form-item label="状态" prop="accountStatus">
-        <el-radio-group v-model="form.accountStatus">
-          <el-radio :label="'0'">正常</el-radio>
-          <el-radio :label="'1'">禁用</el-radio>
-        </el-radio-group>
+      <el-form-item label="订单说明" prop="orderDescription">
+        <el-input v-model="form.orderDescription" />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -36,7 +32,7 @@ import requestUtil, { getServerUrl } from "@/utils/request";
 import { ElMessage } from "element-plus";
 
 const props = defineProps({
-  accountId: {
+  orderId: {
     type: Number,
     default: -1,
     required: true,
@@ -53,13 +49,47 @@ const props = defineProps({
   },
 });
 
+const options = [
+  {
+    value: 1,
+    label: "未完成支付",
+  },
+  {
+    value: 2,
+    label: "已完成订单",
+  },
+  {
+    value: 3,
+    label: "取消订单",
+  },
+  {
+    value: 4,
+    label: "删除订单",
+  },
+  {
+    value: 5,
+    label: "订单超时",
+  },
+  {
+    value: 6,
+    label: "订单异常",
+  },
+  {
+    value: 7,
+    label: "订单退款",
+  },
+];
+
+const selectOrderStatus = ref(0);
+
 const form = ref({
+  orderId: -1,
   accountId: -1,
-  userAccount: "",
-  userPassword: "123456",
-  accountStatus: 0,
-  userPhoneNum: "",
-  userEmail: "",
+  travelId: -1,
+  alipayTradeNo: -1,
+  payUtil: 0,
+  orderStatusId: 0,
+  orderDescription: "",
 });
 
 const rules = ref({
@@ -92,33 +122,42 @@ const rules = ref({
 
 const formRef = ref(null);
 
+watch(
+  () => selectOrderStatus,
+  (newValue) => {
+    form.value.orderStatusId = newValue;
+  }
+);
+
 const initFormData = async (id) => {
-  const res = await requestUtil.get("/account/getAccountInfo?accountId=" + id);
-  console.log(res.data);
+  const res = await requestUtil.get("/order/getOrder?orderId=" + id);
+  // console.log(res.data);
   form.value = res.data.data;
+  selectOrderStatus.value = form.value.orderStatusId;
 };
 
 watch(
   () => props.dialogVisible,
   () => {
-    let accountId = props.accountId;
-    console.log("id=" + accountId);
-    if (accountId !== -1) {
-      initFormData(accountId);
+    let orderIdP = props.orderId;
+    console.log("id=" + orderIdP);
+    if (orderIdP !== -1) {
+      initFormData(orderIdP);
     } else {
       form.value = {
+        orderId: -1,
         accountId: -1,
-        userAccount: "",
-        userPassword: "123456",
-        accountStatus: "0",
-        userPhoneNum: "",
-        userEmail: "",
+        travelId: -1,
+        alipayTradeNo: -1,
+        payUtil: 0,
+        orderStatusId: 0,
+        orderDescription: "",
       };
     }
   }
 );
 
-const emits = defineEmits(["update:modelValue", "initAccountList"]);
+const emits = defineEmits(["update:modelValue", "initOrderList"]);
 
 const handleClose = () => {
   emits("update:modelValue", false);
@@ -129,37 +168,31 @@ const handleConfirm = () => {
   formRef.value.validate(async (valid) => {
     if (valid) {
       let result;
-      console.log(form.value.accountId);
-      if (form.value.accountId === -1) {
-        result = await requestUtil.post("/account/saveAccount", form.value);
+      console.log(form.value.orderId);
+      if (form.value.orderId === -1) {
+        form.value.orderStatusId = selectOrderStatus.value;
+        result = await requestUtil.post("/order/addOrder", form.value);
         if (result.data.code === 0) {
           ElMessage.success("添加成功！");
           formRef.value.resetFields();
-          emits("initUserList");
+          emits("initOrderList");
           handleClose();
         } else {
           ElMessage.error("添加失败");
         }
         console.log(result.data);
       } else {
-        result = await requestUtil.put("/account/updateAccount", form.value);
+        form.value.orderStatusId = selectOrderStatus.value;
+        result = await requestUtil.put("/order/updateOrder", form.value);
         if (result.data.code === 0) {
           ElMessage.success("修改成功！");
           formRef.value.resetFields();
-          emits("initUserList");
+          emits("initOrderList");
           handleClose();
         } else {
           ElMessage.error("修改失败");
         }
       }
-      // if (result.data.code === 0) {
-      //   ElMessage.success("添加成功！");
-      //   formRef.value.resetFields();
-      //   emits("initUserList");
-      //   handleClose();
-      // } else {
-      //   ElMessage.error("添加失败");
-      // }
     } else {
       console.log("fail");
     }

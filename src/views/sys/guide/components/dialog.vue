@@ -13,17 +13,9 @@
       <el-form-item label="导游材料" prop="guideCertificate">
         <el-input v-model="form.guideCertificate" />
       </el-form-item>
-      <!--      :placeholder="-->
-      <!--      form.approvalStatus === '1'-->
-      <!--      ? '待审核'-->
-      <!--      : form.approvalStatus === '2'-->
-      <!--      ? '审核成功'-->
-      <!--      : form.approvalStatus === '3'-->
-      <!--      ? '审核失败'-->
-      <!--      : ''-->
-      <!--      "-->
+
       <el-form-item label="审核状态">
-        <el-select v-model="selectStatus.value" clearable size="large">
+        <el-select v-model="selectStatus" clearable size="large">
           <el-option
             v-for="item in options"
             :key="item.value"
@@ -66,15 +58,15 @@ import { ElMessage } from "element-plus";
 
 const options = [
   {
-    value: "0",
+    value: 0,
     label: "待审核",
   },
   {
-    value: "1",
+    value: 1,
     label: "审核成功",
   },
   {
-    value: "2",
+    value: 2,
     label: "审核失败",
   },
 ];
@@ -138,14 +130,21 @@ const rules = ref({
 
 const formRef = ref(null);
 
-const selectStatus = ref({ value: "0" });
+const selectStatus = ref(0);
+
+watch(
+  () => selectStatus,
+  (newValue) => {
+    form.value.approvalStatus = newValue;
+  }
+);
 
 const initFormData = async (id) => {
   //console.log("id===>" + id);
   const res = await requestUtil.get("/guide/getGuideInfo?guideId=" + id);
   //console.log(res.data);
   form.value = res.data.data;
-  selectStatus.value.value = form.value.approvalStatus.toString();
+  selectStatus.value = form.value.approvalStatus;
   // console.log(selectStatus.value);
   // console.log(form.value.approvalStatus);
   // console.log(typeof form.value.approvalStatus);
@@ -187,6 +186,7 @@ const handleConfirm = () => {
       console.log(form.value.guideId);
       if (form.value.guideId !== -1) {
         // 复用创建账号
+        form.value.approvalStatus = selectStatus.value;
         result = await requestUtil.put("/guide/updateGuide", form.value);
         if (result.data.code === 0) {
           ElMessage.success("修改成功！");

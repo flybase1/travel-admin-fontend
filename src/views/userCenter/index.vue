@@ -46,7 +46,7 @@
               <li class="list-group-item">
                 <svg-icon icon="date" />&nbsp;&nbsp;创建日期
                 <div class="pull-right">
-                  {{ formatDate(currentUser.createTime) }}
+                  {{ formateDate(currentUser.createTime) }}
                 </div>
               </li>
             </ul>
@@ -76,7 +76,7 @@
 <script setup lang="ts">
 import store from "@/store";
 import { ref } from "vue";
-import { formatDate } from "@/utils/formatDate";
+import formateDate from "@/utils/formatDate";
 import UserInfo from "@/views/userCenter/userInfo.vue";
 import ResetPwd from "@/views/userCenter/resetPwd.vue";
 import avatar from "@/views/userCenter/avatar.vue";

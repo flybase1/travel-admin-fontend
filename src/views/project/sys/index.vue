@@ -3,26 +3,40 @@
     <el-row :gutter="20" class="header">
       <el-col :span="7">
         <el-input
-          placeholder="输入账号名"
-          v-model="queryForm.queryAccount"
+          placeholder="输入账号id"
+          v-model="queryForm.queryAccountId"
           clearable
         ></el-input>
       </el-col>
       <el-col :span="7">
         <el-input
-          placeholder="输入手机号"
-          v-model="queryForm.queryPhoneNum"
+          placeholder="输入项目id"
+          v-model="queryForm.queryTravelId"
           clearable
         ></el-input>
       </el-col>
       <el-col :span="7">
         <el-input
-          placeholder="输入邮箱"
-          v-model="queryForm.queryEmail"
+          placeholder="输入城市id"
+          v-model="queryForm.queryTravelCityId"
           clearable
         ></el-input>
       </el-col>
-      <el-button type="primary" :icon="Search" @click="initAccountList"
+      <el-col :span="7">
+        <el-input
+          placeholder="输入状态"
+          v-model="queryForm.queryTravelStatus"
+          clearable
+        ></el-input>
+      </el-col>
+      <el-col :span="7">
+        <el-input
+          placeholder="输入标题"
+          v-model="queryForm.queryTravelTitle"
+          clearable
+        ></el-input>
+      </el-col>
+      <el-button type="primary" :icon="Search" @click="initTravelList"
         >搜索
       </el-button>
     </el-row>
@@ -46,92 +60,39 @@
       @selectionChange="handleSelectionChange"
     >
       <el-table-column type="selection" width="55" />
-      <el-table-column prop="accountId" label="账号id" width="90" sortable />
-      <el-table-column prop="userAccount" label="账号名" width="100" />
-      <el-table-column
-        prop="roleList"
-        label="拥有角色"
-        width="180"
-        align="center"
-      >
-        <template v-slot="scope">
-          <el-tag
-            size="small"
-            type="warning"
-            v-for="item in scope.row.roleList"
-          >
-            {{ item.roleName }}
-          </el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column prop="userPhoneNum" label="手机号" width="130" />
-      <el-table-column prop="userEmail" label="邮箱" width="160" />
-      <el-table-column
-        prop="accountStatus"
-        label="帐号状态?"
-        width="180"
-        align="center"
-      >
-        <template v-slot="scope">
-          <el-switch
-            v-model="scope.row.accountStatus"
-            @change="statusChangeHandle(scope.row)"
-            active-text="正常"
-            inactive-text="禁用"
-            :active-value="0"
-            :inactive-value="1"
-          ></el-switch>
-        </template>
-      </el-table-column>
-
+      <el-table-column prop="travelId" label="项目id" width="90" sortable />
+      <el-table-column prop="accountId" label="账号id" width="100" />
+      <el-table-column prop="travelNumbers" label="人数" width="130" />
+      <el-table-column prop="travelTitle" label="旅行标题" width="160" />
+      <el-table-column prop="travelDescription" label="旅行描述" width="160" />
+      <el-table-column prop="travelPrice" label="项目价格" width="160" />
+      <el-table-column prop="typeName" label="旅行类型" width="160" />
+      <el-table-column prop="travelCityName" label="旅行地址" width="160" />
+      <el-table-column prop="projectStatus" label="是否发布" width="160" />
+      <el-table-column prop="travelScore" label="项目评分" width="160" />
+      <el-table-column prop="travelStatusName" label="项目状态" width="160" />
+      <el-table-column prop="beginTime" label="开始时间" width="160" />
+      <el-table-column prop="endTime" label="结束时间" width="160" />
       <el-table-column
         prop="action"
         label="操作"
-        width="490"
+        width="190"
         fixed="right"
         align="center"
       >
         <template v-slot="scope">
           <el-button
             type="primary"
-            :icon="User"
-            @click="handleUserInfoDialogValue(scope.row.accountId)"
-            >查看信息
-          </el-button>
-          <el-button
-            type="primary"
-            :icon="Tools"
-            @click="
-              handleRoleDialogValue(scope.row.accountId, scope.row.roleList)
-            "
-          >
-            分配角色
-          </el-button>
-          <el-button
-            v-if="scope.row.userAccount != 'admin'"
-            type="primary"
             :icon="Edit"
-            @click="handleDialogValue(scope.row.accountId)"
+            @click="handleDialogValue(scope.row.travelId)"
           ></el-button>
           <!-- 删除         -->
           <el-popconfirm
-            v-if="scope.row.userAccount != 'admin'"
             title="您确定要删除这条记录吗？"
             @confirm="handleDelete(scope.row.accountId)"
           >
             <template #reference>
               <el-button type="danger" :icon="Delete" />
-            </template>
-          </el-popconfirm>
-          <el-popconfirm
-            v-if="scope.row.userAccount != 'admin'"
-            title="您确定要对这个用户重置密码吗？"
-            @confirm="handleResetPassword(scope.row.accountId)"
-          >
-            <template #reference>
-              <el-button type="warning" :icon="RefreshRight"
-                >重置密码
-              </el-button>
             </template>
           </el-popconfirm>
         </template>
@@ -153,24 +114,11 @@
   <Dialog
     v-model="dialogVisible"
     :dialogVisible="dialogVisible"
-    :accountId="accountId"
+    :travel-id="travelId"
     :dialogTitle="dialogTitle"
-    @initAccountList="initAccountList"
+    @initTravelList="initTravelList"
     @update:modelValue="dialogVisible = $event"
   ></Dialog>
-  <RoleDialog
-    v-model="roleDialogVisible"
-    :accountId="accountId"
-    :sysRoleList="sysRoleList"
-    :roleDialogVisible="roleDialogVisible"
-    @initAccountList="initAccountList"
-  ></RoleDialog>
-  <user-info-dialog
-    v-model="userInfoDialogVisible"
-    :accountId="accountId"
-    :userInfoDialogVisible="userInfoDialogVisible"
-    @initAccountList="initAccountList"
-  ></user-info-dialog>
 </template>
 <script setup lang="ts">
 import { ref } from "vue";
@@ -191,22 +139,31 @@ import UserInfoDialog from "@/views/sys/account/components/userInfoDialog.vue";
 
 const tableData = ref([
   {
-    accountId: 1,
-    userAccount: "测试",
-    userPhoneNum: "测试",
-    userEmail: "ddd",
-    permissionId: 1,
-    accountStatus: 0,
-    roleList: ["管理"],
+    travelId: -1,
+    accountId: -1,
+    travelNumbers: 0,
+    travelTitle: "test",
+    travelDescription: "test",
+    travelPrice: 10,
+    typeName: "test",
+    travelCityName: "test",
+    travelScore: 5,
+    travelStatusId: 1,
+    travelStatusName: "",
+    beginTime: "",
+    endTime: "",
+    projectStatus: 0,
   },
 ]);
 
 const queryForm = ref({
-  queryAccount: "",
-  queryPhoneNum: "",
-  queryEmail: "",
-  queryRoleId: "",
-  queryStatus: "",
+  queryTravelId: "",
+  queryAccountId: "",
+  queryTravelTitle: "",
+  queryTypeId: "",
+  queryTravelCityId: "",
+  queryTravelScore: "",
+  queryTravelStatusId: "",
   current: 1,
   pageSize: 10,
 });
@@ -217,33 +174,26 @@ const background = ref(false);
 const disabled = ref(false);
 const dialogVisible = ref(false);
 const dialogTitle = ref("");
-const accountId = ref(-1);
+const travelId = ref(-1);
 // 定义选中的行
 const multipleSelection = ref([]);
 
-const sysRoleList = ref([]);
-const roleDialogVisible = ref(false);
-const userInfoDialogVisible = ref(false);
-const initAccountList = async () => {
-  const res = await requestUtil.post("/account/page", queryForm.value);
-  //console.log("accountList===>", ...res.data.data.records);
+const initTravelList = async () => {
+  const res = await requestUtil.post("/project/pageProject", queryForm.value);
   tableData.value = res.data.data.records;
-  sysRoleList.value = res.data.data.records
-    .map((account) => account.roleList)
-    .flat();
   total.value = res.data.data.total;
 };
 
-initAccountList();
+initTravelList();
 
 const handleSizeChange = (pageSize: number) => {
   queryForm.value.current = 1;
   queryForm.value.pageSize = pageSize;
-  initAccountList();
+  initTravelList();
 };
 const handleCurrentChange = (current: number) => {
   queryForm.value.current = current;
-  initAccountList();
+  initTravelList();
 };
 
 /**
@@ -265,18 +215,18 @@ const statusChangeHandle = async (row: any) => {
       type: "error",
       message: res.data.msg,
     });
-    initAccountList();
+    initTravelList();
   }
 };
 
 const handleDialogValue = (id: any) => {
   // console.log(id);
   if (id) {
-    accountId.value = id;
-    dialogTitle.value = "用户修改";
+    travelId.value = id;
+    dialogTitle.value = "项目修改";
   } else if (id === undefined) {
-    accountId.value = -1;
-    dialogTitle.value = "用户添加";
+    travelId.value = -1;
+    dialogTitle.value = "项目添加";
   }
   dialogVisible.value = true;
 };
@@ -295,51 +245,16 @@ const handleDelete = async (id: number) => {
     ids.push(id);
   } else {
     multipleSelection.value.forEach((row) => {
-      ids.push(row.accountId);
+      ids.push(row.travelId);
     });
   }
   const res = await requestUtil.deleteR("/account/delete/AccountList", ids);
   if (res.data.code === 0) {
     ElMessage({ type: "success", message: "执行成功" });
-    initAccountList();
+    initTravelList();
   } else {
     ElMessage.error({ type: "error", message: "删除失败" });
   }
-};
-
-/**
- * 重置密码
- * @param id
- */
-const handleResetPassword = async (id: number) => {
-  const res = await requestUtil.get("account/resetPwd?accountId=" + id);
-  if (res.data.code == 0) {
-    ElMessage({
-      type: "success",
-      message: "执行成功!",
-    });
-    initAccountList();
-  } else {
-    ElMessage({
-      type: "error",
-      message: res.data.msg,
-    });
-  }
-};
-
-// 权限弹窗
-
-const handleRoleDialogValue = (id: number, roleList) => {
-  // console.log("accountId=" + id);
-  accountId.value = id;
-  sysRoleList.value = roleList;
-  roleDialogVisible.value = true;
-};
-
-const handleUserInfoDialogValue = (id: number) => {
-  // console.log("accountId=" + id);
-  accountId.value = id;
-  userInfoDialogVisible.value = true;
 };
 </script>
 

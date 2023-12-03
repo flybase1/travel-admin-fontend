@@ -101,6 +101,12 @@
         align="center"
       />
       <el-table-column
+        prop="orderDescription"
+        label="订单说明"
+        width="160"
+        align="center"
+      />
+      <el-table-column
         prop="payUtil"
         label="支付方式"
         width="160"
