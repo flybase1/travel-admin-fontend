@@ -54,11 +54,8 @@
           </el-form-item>
         </el-col>
         <el-col :span="6">
-          <el-form-item label=" 项目评分">
-            <el-input-number
-              v-model="form.travelScore"
-              :disabled="true"
-            ></el-input-number>
+          <el-form-item label=" 项目价格">
+            <el-input type="number" v-model="form.travelPrice"></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="6">
@@ -76,17 +73,33 @@
       </el-row>
 
       <el-form-item label="旅行内容" prop="travelDescription">
-        <el-input
-          v-model="form.travelDescription"
-          type="textarea"
-          clearable
-          maxlength="2000"
-          rows="12"
-        />
+        <div v-if="dialogVisible" style="border: 1px solid #ccc">
+          <Toolbar
+            style="border-bottom: 1px solid #ccc"
+            :editor="editorRef"
+            :defaultConfig="toolbarConfig"
+            mode="default"
+          />
+          <Editor
+            style="height: 500px; overflow-y: hidden"
+            v-model="form.travelDescription"
+            :defaultConfig="editorConfig"
+            mode="default"
+            @onCreated="handleCreated"
+          />
+        </div>
       </el-form-item>
 
       <el-form-item label="插入图片">
-        <el-card> 图片地址</el-card>
+        <el-upload
+          v-model:file-list="pictureList"
+          action="#"
+          list-type="picture-card"
+        >
+          <el-icon>
+            <Plus />
+          </el-icon>
+        </el-upload>
       </el-form-item>
     </el-form>
     <template #footer>
@@ -99,9 +112,20 @@
 </template>
 
 <script setup>
-import { defineEmits, defineProps, ref, watch, watchEffect } from "vue";
-import requestUtil, { getServerUrl } from "@/utils/request";
+import {
+  defineEmits,
+  defineProps,
+  onBeforeUnmount,
+  ref,
+  shallowRef,
+  watch,
+  watchEffect,
+} from "vue";
+import requestUtil from "@/utils/request";
 import { ElMessage } from "element-plus";
+import store from "@/store";
+import { Editor, Toolbar } from "@wangeditor/editor-for-vue";
+import "@wangeditor/editor/dist/css/style.css";
 import { Plus } from "@element-plus/icons-vue";
 
 const props = defineProps({
@@ -123,7 +147,7 @@ const props = defineProps({
 });
 
 const form = ref({
-  travelId: "",
+  travelId: -1,
   accountId: "",
   travelNumbers: "",
   travelTitle: "",
@@ -187,6 +211,8 @@ const formRef = ref(null);
 const typeOptions = ref([]); // 定义 options 数组
 const cityOptions = ref([]); // 定义 options 数组
 const statusOptions = ref([]); // 定义 options 数组
+const pictureList = ref([]);
+
 const initFormData = async (id) => {
   const res = await requestUtil.get("/project/getTravel?travelId=" + id);
   //console.log(res.data);
@@ -214,15 +240,20 @@ watchEffect(async () => {
 });
 watch(
   () => props.dialogVisible,
-  () => {
+  async () => {
     let travelIdP = props.travelId;
-    console.log("id=" + travelIdP);
     if (travelIdP !== -1) {
-      initFormData(travelIdP);
+      await initFormData(travelIdP);
+      // 获取图片
+      const pictureRes = await requestUtil.get(
+        "picture/getPicture?travelId=" + travelIdP
+      );
+
+      pictureList.value = pictureRes.data.data;
     } else {
       form.value = {
-        travelId: "",
-        accountId: "",
+        travelId: -1,
+        accountId: store.getters.GET_USER_INFO.accountId,
         travelNumbers: "",
         travelTitle: "",
         travelDescription: "",
@@ -251,42 +282,60 @@ const handleConfirm = () => {
   formRef.value.validate(async (valid) => {
     if (valid) {
       let result;
-      console.log(form.value.accountId);
-      if (form.value.accountId === -1) {
-        result = await requestUtil.post("/account/saveAccount", form.value);
+      //console.log(form.value.accountId);
+      if (form.value.travelId === -1) {
+        result = await requestUtil.post("/project/addTravel", form.value);
         if (result.data.code === 0) {
           ElMessage.success("添加成功！");
           formRef.value.resetFields();
-          emits("initUserList");
+          emits("initTravelList");
           handleClose();
         } else {
           ElMessage.error("添加失败");
         }
         console.log(result.data);
       } else {
-        result = await requestUtil.put("/account/updateAccount", form.value);
+        result = await requestUtil.put("/project/updateTravel", form.value);
         if (result.data.code === 0) {
           ElMessage.success("修改成功！");
           formRef.value.resetFields();
-          emits("initUserList");
+          emits("initTravelList");
           handleClose();
         } else {
           ElMessage.error("修改失败");
         }
       }
-      // if (result.data.code === 0) {
-      //   ElMessage.success("添加成功！");
-      //   formRef.value.resetFields();
-      //   emits("initUserList");
-      //   handleClose();
-      // } else {
-      //   ElMessage.error("添加失败");
-      // }
     } else {
       console.log("fail");
     }
   });
 };
+
+// 编辑器实例，必须用 shallowRef
+const editorRef = shallowRef();
+const toolbarConfig = {};
+const editorConfig = { placeholder: "请输入内容..." };
+onBeforeUnmount(() => {
+  const editor = editorRef.value;
+  if (editor == null) return;
+  editor.destroy();
+});
+const handleCreated = (editor) => {
+  editorRef.value = editor; // 记录 editor 实例，重要！
+};
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+#editor—wrapper {
+  border: 1px solid #ccc;
+  z-index: 100; /* 按需定义 */
+}
+
+#toolbar-container {
+  border-bottom: 1px solid #ccc;
+}
+
+#editor-container {
+  height: 500px;
+}
+</style>

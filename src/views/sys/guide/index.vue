@@ -119,7 +119,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import requestUtil from "@/utils/request";
-import { Delete, DocumentAdd, Edit, Search } from "@element-plus/icons-vue";
+import { Delete, Edit, Search } from "@element-plus/icons-vue";
 import Dialog from "./components/dialog.vue";
 import { ElMessage } from "element-plus";
 
