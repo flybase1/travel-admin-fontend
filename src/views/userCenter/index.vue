@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <el-row :gutter="20">
-      <el-col :span="6">
+      <el-col :span="7">
         <el-card class="box-card">
           <template v-slot:header>
             <div class="clearfix">
@@ -10,7 +10,7 @@
           </template>
           <div>
             <div class="text-center">
-              <avatar :user="currentUser.userAvatar" />
+              <avatar :user="currentUser" />
             </div>
             <ul class="list-group list-group-striped">
               <li class="list-group-item">
@@ -53,7 +53,7 @@
           </div>
         </el-card>
       </el-col>
-      <el-col :span="18">
+      <el-col :span="16">
         <el-card>
           <template v-slot:header>
             <div class="clearfix">
@@ -108,10 +108,10 @@ const activeTab = ref("userinfo");
 }
 
 ::v-deep .el-card__body {
-  height: 230px;
+  height: 590px;
 }
 
 ::v-deep .box-card {
-  height: 600px;
+  height: 680px;
 }
 </style>

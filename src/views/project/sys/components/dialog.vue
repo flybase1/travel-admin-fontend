@@ -90,16 +90,59 @@
         </div>
       </el-form-item>
 
-      <el-form-item label="插入图片">
+      <el-form-item label="封面图片">
         <el-upload
-          v-model:file-list="pictureList"
+          class="avatar-uploader"
           action="#"
+          :auto-upload="false"
+          :show-file-list="true"
+          :multiple="false"
+          :headers="headers"
+          :http-request="uploadPicture"
+          :on-change="handlePictureChange"
+          :on-success="handleAvatarSuccess"
+          :on-remove="handlePictureRemove"
+          :before-upload="handlePictureBeforeUpload"
+          :on-exceed="handlePictureExceed"
+          list-type="picture"
+          limit="1"
+        >
+          <img
+            v-if="imageUrl"
+            :src="imageUrl"
+            class="avatar"
+            style="width: 200px; height: 200px"
+          />
+          <el-icon v-else class="avatar-uploader-icon">
+            <Plus />
+          </el-icon>
+        </el-upload>
+      </el-form-item>
+      <el-form-item>
+        <el-button @click="handleConfirmPostPicture">确认上传</el-button>
+      </el-form-item>
+      <!--多文件上传-->
+      <el-form-item label="图片介绍">
+        <el-upload
+          :disabled="travelId === -1"
+          v-model:file-list="pictureList"
+          :headers="headers"
+          action="#"
+          :auto-upload="false"
+          :show-file-list="true"
           list-type="picture-card"
         >
           <el-icon>
             <Plus />
           </el-icon>
         </el-upload>
+        <el-alert
+          description="请创建项目之后再上传图片介绍"
+          title="提示"
+        ></el-alert>
+      </el-form-item>
+      <el-form-item>
+        <el-button @click="handleConfirmPostPictureList">确认上传</el-button>
       </el-form-item>
     </el-form>
     <template #footer>
@@ -146,6 +189,8 @@ const props = defineProps({
   },
 });
 
+const headers = ref({ token: store.getters.GET_TOKEN });
+
 const form = ref({
   travelId: -1,
   accountId: "",
@@ -162,6 +207,7 @@ const form = ref({
   travelStatusName: "",
   beginTime: "",
   endTime: "",
+  coverPictureUrl: "",
 });
 
 // const checkUsername = async (rule, value, callback) => {
@@ -213,10 +259,14 @@ const cityOptions = ref([]); // 定义 options 数组
 const statusOptions = ref([]); // 定义 options 数组
 const pictureList = ref([]);
 
+const uploadTravelCover = ref(null);
+const imageUrl = ref("");
+
 const initFormData = async (id) => {
   const res = await requestUtil.get("/project/getTravel?travelId=" + id);
   //console.log(res.data);
   form.value = res.data.data;
+  imageUrl.value = form.value.coverPictureUrl;
 };
 watchEffect(async () => {
   // 类型转换
@@ -266,6 +316,7 @@ watch(
         travelStatus: "",
         beginTime: "",
         endTime: "",
+        coverPictureUrl: "",
       };
     }
   }
@@ -284,6 +335,7 @@ const handleConfirm = () => {
       let result;
       //console.log(form.value.accountId);
       if (form.value.travelId === -1) {
+        form.value.coverPictureUrl = imageUrl.value;
         result = await requestUtil.post("/project/addTravel", form.value);
         if (result.data.code === 0) {
           ElMessage.success("添加成功！");
@@ -295,6 +347,7 @@ const handleConfirm = () => {
         }
         console.log(result.data);
       } else {
+        form.value.coverPictureUrl = imageUrl.value;
         result = await requestUtil.put("/project/updateTravel", form.value);
         if (result.data.code === 0) {
           ElMessage.success("修改成功！");
@@ -309,6 +362,82 @@ const handleConfirm = () => {
       console.log("fail");
     }
   });
+};
+/**
+ * 上传图片成功返回
+ * @param response
+ * @param file
+ * @param fileList
+ * @return {Promise<void>}
+ */
+const handleAvatarSuccess = async (response, file, fileList) => {
+  console.log("ok");
+  console.log(response);
+  // imageUrl.value = response.data.data;
+  // console.log(res.data);
+};
+
+const handlePictureChange = (file, fileList) => {
+  uploadTravelCover.value = file;
+  console.log("file:", file);
+};
+
+const uploadPicture = async (file) => {
+  const formData = new FormData();
+  formData.append("file", file.raw);
+  try {
+    const response = await requestUtil.fileUpload("/picture/upload", formData);
+    if (response.data.code === 0) {
+      imageUrl.value = response.data.data; // 处理后端返回的图片URL
+      ElMessage.success("上传成功");
+    } else {
+      ElMessage.error("上传失败");
+    }
+  } catch (error) {
+    console.error("上传失败", error);
+    ElMessage.error("上传失败");
+  }
+};
+
+// 移除图片
+const handlePictureRemove = () => {
+  form.value.coverPictureUrl = "";
+};
+
+// 文件类型
+const fileType = ref(["png", "jpg", "bmp", "jpeg"]);
+
+// 上传图片前需要校验是否符合规则
+const handlePictureBeforeUpload = (file) => {
+  if (file.type !== "" || file.type != null || file.type !== undefined) {
+    //截取文件的后缀，判断文件类型
+    const FileExt = file.name.replace(/.+\./, "").toLowerCase();
+    //计算文件的大小
+    const isLt5M = file.size / 1024 / 1024 < 50; //这里做文件大小限制
+    //如果大于50M
+    if (!isLt5M) {
+      ElMessage.error("上传文件大小不能超过 50MB!");
+      return false;
+    }
+    //如果文件类型不在允许上传的范围内
+    if (fileType.value.includes(FileExt)) {
+      return true;
+    } else {
+      this.$message.error("上传文件格式不正确!");
+      return false;
+    }
+  }
+};
+
+const handlePictureExceed = (files, uploadFiles) => {};
+
+// 上传图片按钮
+const handleConfirmPostPicture = async () => {
+  if (!uploadTravelCover.value || !uploadTravelCover.value.raw) {
+    ElMessage.warning("请先选择图片");
+    return;
+  }
+  await uploadPicture(uploadTravelCover.value);
 };
 
 // 编辑器实例，必须用 shallowRef
@@ -337,5 +466,26 @@ const handleCreated = (editor) => {
 
 #editor-container {
   height: 500px;
+}
+
+.avatar-uploader .el-upload {
+  border: 1px dashed var(--el-border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: var(--el-transition-duration-fast);
+}
+
+.avatar-uploader .el-upload:hover {
+  border-color: var(--el-color-primary);
+}
+
+.el-icon.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 178px;
+  height: 178px;
+  text-align: center;
 }
 </style>

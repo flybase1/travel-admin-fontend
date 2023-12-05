@@ -89,7 +89,7 @@ const handleSubmit = () => {
     if (valid) {
       let result = await requestUtil.post("/sysAccount/resetPwd", form.value);
       let data = result.data;
-      if (data.code === 200) {
+      if (data.code === 0) {
         ElMessage.success("密码修改成功，下一次登录生效！");
         store.commit("SET_USERINFO", form.value);
       } else {

@@ -234,6 +234,7 @@ const tableData = ref([
     beginTime: "",
     endTime: "",
     projectStatus: 0,
+    coverPictureUrl: "",
   },
 ]);
 
