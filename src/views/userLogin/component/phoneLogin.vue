@@ -1,67 +1,58 @@
 <template>
-  <div class="login">
-    <el-form
-      ref="loginRef"
-      :model="loginForm"
-      :rules="loginRules"
-      class="login-form"
-    >
-      <h3 class="title">欢迎登录</h3>
-      <el-tabs v-model="activeTab">
-        <el-tab-pane label="账号登录" name="accountAndPwd"> </el-tab-pane>
-        <el-tab-pane label="手机登录" name="phone">等等</el-tab-pane>
-      </el-tabs>
-
-      <div style="height: 30px" />
-      <el-form-item prop="username">
-        <el-input
-          v-model="loginForm.username"
-          type="text"
-          size="large"
-          autocomplete="off"
-          placeholder="账号"
-          clearable
-        >
-          <template #prefix>
-            <svg-icon icon="user"></svg-icon>
-          </template>
-        </el-input>
-      </el-form-item>
-      <el-form-item prop="password">
-        <el-input
-          v-model="loginForm.password"
-          type="password"
-          size="large"
-          autocomplete="off"
-          placeholder="密码"
-          @keyup.enter="handleLogin"
-          clearable
-          show-password
-        >
-          <template #prefix>
-            <svg-icon icon="password"></svg-icon>
-          </template>
-        </el-input>
-      </el-form-item>
-      <el-checkbox style="margin: 0 0 25px 0" v-model="loginForm.rememberMe"
-        >记住密码
-      </el-checkbox>
-      <el-form-item style="width: 100%">
-        <el-button
-          size="large"
-          type="primary"
-          style="width: 100%"
-          @click.prevent="handleLogin"
-        >
-          <span>登录</span>
-        </el-button>
-      </el-form-item>
-      <!--版权信息-->
-      <div class="el-login-footer">
-        <span>CopyRight by FlyCode</span>
-      </div>
-    </el-form>
-  </div>
+  <el-form
+    ref="loginRef"
+    :model="loginForm"
+    :rules="loginRules"
+    class="login-form"
+  >
+    <el-form-item prop="username">
+      <el-input
+        v-model="loginForm.username"
+        type="text"
+        size="large"
+        autocomplete="off"
+        placeholder="账号"
+        clearable
+      >
+        <template #prefix>
+          <svg-icon icon="user"></svg-icon>
+        </template>
+      </el-input>
+    </el-form-item>
+    <el-form-item prop="password">
+      <el-input
+        v-model="loginForm.password"
+        type="password"
+        size="large"
+        autocomplete="off"
+        placeholder="密码"
+        @keyup.enter="handleLogin"
+        clearable
+        show-password
+      >
+        <template #prefix>
+          <svg-icon icon="password"></svg-icon>
+        </template>
+      </el-input>
+    </el-form-item>
+    <el-checkbox style="margin: 0 0 25px 0" v-model="loginForm.rememberMe"
+      >记住密码
+    </el-checkbox>
+    <el-form-item style="width: 100%">
+      <el-button
+        size="large"
+        type="primary"
+        style="width: 100%"
+        @click.prevent="handleLogin"
+      >
+        <span>登录</span>
+      </el-button>
+    </el-form-item>
+    <!--版权信息-->
+    <div class="el-login-footer">
+      <span>CopyRight by FlyCode</span>
+    </div>
+  </el-form>
 </template>
 <script lang="ts" setup>
 import store from "@/store";
@@ -74,7 +65,7 @@ import { encrypt, decrypt } from "@/utils/jsencrypt";
 import router from "@/router";
 
 const loginRef = ref(null);
-const activeTab = ref("accountAndPwd");
+
 const loginForm = ref({
   username: "",
   password: "",
@@ -150,7 +141,6 @@ a {
   justify-content: center;
   align-items: center;
   height: 100%;
-  background-image: url("../assets/styles/backend.jpg");
   background-size: cover;
 }
 

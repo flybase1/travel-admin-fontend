@@ -1,35 +1,32 @@
 <template>
   <!--    v-model="dialogVisible"  -->
-  <el-dialog :title="dialogTitle" width="30%" @close="handleClose">
-    <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
-      <el-form-item label="用户名" prop="userAccount">
-        <el-input
-          v-model="form.userAccount"
-          :disabled="form.accountId === -1 ? false : 'disabled'"
-        />
-        <el-alert
-          v-if="form.accountId === -1"
-          title="默认初始密码：123456"
-          :closable="false"
-          style="line-height: 10px"
-          type="success"
-        >
-        </el-alert>
-      </el-form-item>
+  <el-dialog :title="dialogTitle" width="80%" @close="handleClose">
+    <el-form ref="formRef" :model="form" label-width="130px">
+      <el-row :gutter="20">
+        <el-col :span="4">
+          <el-form-item label="创建者id" prop="createTeamAccountId">
+            <el-input v-model="form.createTeamAccountId" :disabled="true" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="4">
+          <el-form-item label="项目id" prop="travelId">
+            <el-input v-model="form.travelId" :disabled="true" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="4">
+          <el-form-item label="最大人数" prop="maxNum">
+            <el-input v-model="form.maxNum" type="number" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="4">
+          <el-form-item label="导游人数" prop="guideNum">
+            <el-input v-model="form.guideNum" type="number" />
+          </el-form-item>
+        </el-col>
+      </el-row>
 
-      <el-form-item label="手机号" prop="userPhoneNum">
-        <el-input v-model="form.userPhoneNum" />
-      </el-form-item>
-
-      <el-form-item label="邮箱" prop="userEmail">
-        <el-input v-model="form.userEmail" />
-      </el-form-item>
-
-      <el-form-item label="状态" prop="accountStatus">
-        <el-radio-group v-model="form.accountStatus">
-          <el-radio :label="'0'">正常</el-radio>
-          <el-radio :label="'1'">禁用</el-radio>
-        </el-radio-group>
+      <el-form-item label="队伍标题" prop="travelTeamName">
+        <el-input v-model="form.travelTeamName" />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -43,14 +40,25 @@
 
 <script setup>
 import { defineEmits, defineProps, ref, watch } from "vue";
-import requestUtil, { getServerUrl } from "@/utils/request";
+import requestUtil from "@/utils/request";
 import { ElMessage } from "element-plus";
+import "@wangeditor/editor/dist/css/style.css";
 
 const props = defineProps({
-  accountId: {
+  travelTeamId: {
     type: Number,
     default: -1,
     required: true,
+  },
+  travelId: {
+    type: Number,
+    default: -1,
+    required: false,
+  },
+  createTeamAccountId: {
+    type: Number,
+    default: -1,
+    required: false,
   },
   dialogTitle: {
     type: String,
@@ -65,28 +73,14 @@ const props = defineProps({
 });
 
 const form = ref({
-  accountId: -1,
-  userAccount: "",
-  userPassword: "123456",
-  accountStatus: 0,
-  userPhoneNum: "",
-  userEmail: "",
+  travelTeamId: -1,
+  travelId: "",
+  maxNum: "",
+  guideNum: "",
+  nowNum: "",
+  createTeamAccountId: "",
+  travelTeamName: "",
 });
-
-// const checkUsername = async (rule, value, callback) => {
-//   if (form.value.accountId === -1) {
-//     const res = await requestUtil.post("sys/user/checkUserName", {
-//       username: form.value.userAccount,
-//     });
-//     if (res.data.code === 500) {
-//       callback(new Error("用户名已存在！"));
-//     } else {
-//       callback();
-//     }
-//   } else {
-//     callback();
-//   }
-// };
 
 const rules = ref({
   userAccount: [
@@ -119,32 +113,34 @@ const rules = ref({
 const formRef = ref(null);
 
 const initFormData = async (id) => {
-  const res = await requestUtil.get("/account/getAccountInfo?accountId=" + id);
-  console.log(res.data);
+  const res = await requestUtil.get("/travelTeam/getTravelTeamById/" + id);
   form.value = res.data.data;
 };
 
 watch(
   () => props.dialogVisible,
-  () => {
-    let accountId = props.accountId;
-    console.log("id=" + accountId);
-    if (accountId !== -1) {
-      initFormData(accountId);
+  async () => {
+    // 这里传递过来的travelTeamId是string类型，必须要转换成int类型
+    let travelTeamIdP = parseInt(props.travelTeamId);
+    if (travelTeamIdP !== -1) {
+      console.log(travelTeamIdP + "=================>here");
+      await initFormData(travelTeamIdP);
     } else {
       form.value = {
-        accountId: -1,
-        userAccount: "",
-        userPassword: "123456",
-        accountStatus: "0",
-        userPhoneNum: "",
-        userEmail: "",
+        travelTeamId: -1,
+        travelId: props.travelId,
+        maxNum: "",
+        guideNum: "",
+        nowNum: "",
+        createTeamAccountId: props.createTeamAccountId,
+        travelTeamName: "",
       };
     }
-  }
+  },
+  { immediate: true } // 这里加入 immediate: true
 );
 
-const emits = defineEmits(["update:modelValue", "initAccountList"]);
+const emits = defineEmits(["update:modelValue", "iniTravelTeamList"]);
 
 const handleClose = () => {
   emits("update:modelValue", false);
@@ -155,37 +151,34 @@ const handleConfirm = () => {
   formRef.value.validate(async (valid) => {
     if (valid) {
       let result;
-      console.log(form.value.accountId);
-      if (form.value.accountId === -1) {
-        result = await requestUtil.post("/account/saveAccount", form.value);
+      if (form.value.travelTeamId === -1) {
+        result = await requestUtil.post(
+          "/travelTeam/addTravelTeam",
+          form.value
+        );
         if (result.data.code === 0) {
           ElMessage.success("添加成功！");
           formRef.value.resetFields();
-          emits("initUserList");
+          emits("iniTravelTeamList");
           handleClose();
         } else {
           ElMessage.error("添加失败");
         }
         console.log(result.data);
       } else {
-        result = await requestUtil.put("/account/updateAccount", form.value);
+        result = await requestUtil.put(
+          "/travelTeam/updateTravelTeam",
+          form.value
+        );
         if (result.data.code === 0) {
           ElMessage.success("修改成功！");
           formRef.value.resetFields();
-          emits("initUserList");
+          emits("iniTravelTeamList");
           handleClose();
         } else {
           ElMessage.error("修改失败");
         }
       }
-      // if (result.data.code === 0) {
-      //   ElMessage.success("添加成功！");
-      //   formRef.value.resetFields();
-      //   emits("initUserList");
-      //   handleClose();
-      // } else {
-      //   ElMessage.error("添加失败");
-      // }
     } else {
       console.log("fail");
     }
@@ -193,4 +186,38 @@ const handleConfirm = () => {
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+#editor—wrapper {
+  border: 1px solid #ccc;
+  z-index: 100; /* 按需定义 */
+}
+
+#toolbar-container {
+  border-bottom: 1px solid #ccc;
+}
+
+#editor-container {
+  height: 500px;
+}
+
+.avatar-uploader .el-upload {
+  border: 1px dashed var(--el-border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: var(--el-transition-duration-fast);
+}
+
+.avatar-uploader .el-upload:hover {
+  border-color: var(--el-color-primary);
+}
+
+.el-icon.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 178px;
+  height: 178px;
+  text-align: center;
+}
+</style>

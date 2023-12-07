@@ -30,6 +30,12 @@ const routes: Array<RouteRecordRaw> = [
     name: "login",
     component: () => import("../views/AdminLogin.vue"),
   },
+
+  {
+    path: "/testLogin",
+    name: "tlogin",
+    component: () => import("../views/userLogin/loginIndex.vue"),
+  },
 ];
 
 const router = createRouter({

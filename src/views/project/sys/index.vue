@@ -155,7 +155,12 @@
         align="center"
       >
         <template v-slot="scope">
-          <el-button type="primary">创建队伍</el-button>
+          <el-button
+            type="primary"
+            :icon="DocumentAdd"
+            @click="handleTravelTeamDialogValue(scope.row.travelId)"
+            >队伍
+          </el-button>
           <el-button
             type="primary"
             v-if="scope.row.projectStatus === 0"
@@ -208,6 +213,14 @@
     @initTravelList="initTravelList"
     @update:modelValue="dialogVisible = $event"
   ></Dialog>
+  <TravelTeamDialog
+    v-model="dialogTravelTeamVisible"
+    :dialog-visible="dialogTravelTeamVisible"
+    :dialog-title="dialogTravelTeamTitle"
+    :travel-team-id="-1"
+    :travel-id="travelId"
+    :create-team-account-id="store.getters.GET_USER_INFO.accountId"
+  ></TravelTeamDialog>
 </template>
 <script setup lang="ts">
 import { ref, watchEffect } from "vue";
@@ -216,7 +229,8 @@ import { Delete, DocumentAdd, Edit, Search } from "@element-plus/icons-vue";
 import Dialog from "./components/dialog.vue";
 import { ElMessage } from "element-plus";
 import formateDate from "@/utils/formatDate";
-import { Editor } from "@wangeditor/editor-for-vue";
+import TravelTeamDialog from "@/views/team/travelTeam/components/dialog.vue";
+import store from "@/store";
 
 const tableData = ref([
   {
@@ -284,6 +298,9 @@ const travelId = ref(-1);
 // 定义选中的行
 const multipleSelection = ref([]);
 
+const dialogTravelTeamVisible = ref(false);
+const dialogTravelTeamTitle = ref("");
+
 const initTravelList = async () => {
   const res = await requestUtil.post("/project/pageProject", queryForm.value);
   tableData.value = res.data.data.records;
@@ -341,6 +358,13 @@ const handleDialogValue = (id: any) => {
   }
   dialogVisible.value = true;
 };
+
+const handleTravelTeamDialogValue = (id: number) => {
+  travelId.value = id;
+  dialogTravelTeamTitle.value = "队伍添加";
+  dialogTravelTeamVisible.value = true;
+};
+
 // 批量删除
 const delBtnStatus = ref(true);
 
