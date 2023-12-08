@@ -35,6 +35,30 @@
         </template>
       </el-input>
     </el-form-item>
+    <el-row>
+      <el-col :span="8">
+        <el-form-item prop="code">
+          <el-input
+            v-model="code"
+            type="text"
+            size="large"
+            autocomplete="off"
+            placeholder="输入验证码"
+            @keyup.enter="handleLogin"
+            clearable
+          >
+          </el-input>
+        </el-form-item>
+      </el-col>
+      <el-col :span="3" />
+      <el-col :span="6">
+        <div class="input-box">
+          <img :src="captchaImageUrl" @click="getCaptcha" alt="验证码" />
+          <el-button @click="getCaptcha">获取验证码</el-button>
+        </div>
+      </el-col>
+    </el-row>
+
     <el-checkbox style="margin: 0 0 25px 0" v-model="loginForm.rememberMe"
       >记住密码
     </el-checkbox>
@@ -49,14 +73,14 @@
       </el-button>
     </el-form-item>
     <!--版权信息-->
-    <div class="el-login-footer">
-      <span>CopyRight by FlyCode</span>
-    </div>
+    <!--    <div class="el-login-footer">-->
+    <!--      <span>CopyRight by FlyCode</span>-->
+    <!--    </div>-->
   </el-form>
 </template>
 <script lang="ts" setup>
 import store from "@/store";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import requestUtil from "@/utils/request";
 import qs from "qs";
 import { ElMessage } from "element-plus";
@@ -72,9 +96,41 @@ const loginForm = ref({
   rememberMe: false,
 });
 
+const code = ref("");
+// "http://localhost:9000/api/captcha/code?time=" + new Date()
+// 存放验证码图片的Base64格式数据
+const captchaImageUrl = ref("");
+const uuid = ref("");
+const getCaptcha = async () => {
+  requestUtil.get("/captcha/code").then((res: any) => {
+    console.log(res.data);
+    if (res.data.code === 0) {
+      uuid.value = res.data.data.uuid;
+      captchaImageUrl.value = res.data.data.img;
+    }
+  });
+};
+getCaptcha();
+
 const loginRules = {
-  username: [{ required: true, trigger: "blur", message: "请输入你的密码" }],
-  password: [{ required: true, trigger: "blur", message: "请输入你的密码" }],
+  username: [
+    { required: true, trigger: "change", message: "请输入您的用户名" },
+    {
+      min: 4,
+      max: 8,
+      message: "账号长度必须大于4位并且小于8位",
+      trigger: "trigger",
+    },
+  ],
+  password: [
+    { required: true, trigger: "change", message: "请输入您的密码" },
+    {
+      min: 4,
+      max: 8,
+      message: "账号长度必须大于4位并且小于8位",
+      trigger: "trigger",
+    },
+  ],
 };
 
 const handleLogin = () => {
@@ -96,14 +152,14 @@ const handleLogin = () => {
           Cookies.remove("rememberMe");
         }
         let res = await requestUtil.post(
-          "login?" + qs.stringify(loginForm.value)
+          `login?code=${code.value}&uuid=${uuid.value}&` +
+            qs.stringify(loginForm.value)
         );
         if (res.data.code === 0) {
           ElMessage.success("登录成功");
           store.commit("SET_TOKEN", res.data.data.authorization);
           store.commit("SET_MENU_LIST", res.data.data.menuList);
           store.commit("SET_USER_INFO", res.data.data.user);
-
           await router.push("/index");
           window.location.reload();
         } else {
@@ -129,6 +185,10 @@ function getCookie() {
 }
 
 getCookie();
+
+// onMounted(() => {
+//   getCaptcha();
+// });
 </script>
 
 <style lang="css" scoped>

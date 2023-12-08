@@ -25,15 +25,15 @@ const routes: Array<RouteRecordRaw> = [
       },
     ],
   },
+  // {
+  //   path: "/login",
+  //   name: "login",
+  //   component: () => import("../views/AdminLogin.vue"),
+  // },
+
   {
     path: "/login",
     name: "login",
-    component: () => import("../views/AdminLogin.vue"),
-  },
-
-  {
-    path: "/testLogin",
-    name: "tlogin",
     component: () => import("../views/userLogin/loginIndex.vue"),
   },
 ];

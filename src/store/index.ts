@@ -32,6 +32,9 @@ export default createStore({
     SET_ROUTES_STATE: (state, hasRoutes) => {
       state.hasRoutes = hasRoutes;
     },
+    SET_IMAGE_STATE: (state, image) => {
+      sessionStorage.setItem("image", JSON.stringify(image));
+    },
     ADD_TABS: (state, tap) => {
       if (state.editableTabs.findIndex((e) => e.name === tap.menuPath) === -1) {
         state.editableTabs.push({
