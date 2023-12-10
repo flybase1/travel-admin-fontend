@@ -5,63 +5,55 @@
     :rules="loginRules"
     class="login-form"
   >
-    <el-form-item prop="username">
+    <el-form-item prop="userPhoneNum">
       <el-input
-        v-model="loginForm.username"
+        v-model="loginForm.userPhoneNum"
         type="text"
         size="large"
         autocomplete="off"
-        placeholder="账号"
+        placeholder="手机号"
         clearable
       >
         <template #prefix>
-          <svg-icon icon="user"></svg-icon>
+          <svg-icon icon="phone"></svg-icon>
         </template>
       </el-input>
     </el-form-item>
-    <el-form-item prop="password">
-      <el-input
-        v-model="loginForm.password"
-        type="password"
-        size="large"
-        autocomplete="off"
-        placeholder="密码"
-        @keyup.enter="handleLogin"
-        clearable
-        show-password
-      >
-        <template #prefix>
-          <svg-icon icon="password"></svg-icon>
-        </template>
-      </el-input>
-    </el-form-item>
-    <el-row>
-      <el-col :span="8">
-        <el-form-item prop="code">
+    <el-form-item prop="smsCode">
+      <el-row :gutter="20">
+        <el-col :span="18">
           <el-input
-            v-model="code"
-            type="text"
+            v-model="loginForm.smsCode"
             size="large"
             autocomplete="off"
-            placeholder="输入验证码"
+            placeholder="短信动态码"
             @keyup.enter="handleLogin"
             clearable
           >
+            <template #prefix>
+              <svg-icon icon="smsCode"></svg-icon>
+            </template>
           </el-input>
-        </el-form-item>
-      </el-col>
-      <el-col :span="3" />
-      <el-col :span="6">
-        <div class="input-box">
-          <img :src="captchaImageUrl" @click="getCaptcha" alt="验证码" />
-          <el-button @click="getCaptcha">获取验证码</el-button>
-        </div>
+        </el-col>
+        <el-col :span="6">
+          <el-button @click="handleSendSmsCode" type="primary"
+            >发送验证码
+          </el-button>
+        </el-col>
+      </el-row>
+    </el-form-item>
+    <el-row>
+      <el-col :span="20" />
+      <el-col :span="4">
+        <el-link
+          href="#"
+          style="color: cornflowerblue; margin: 0 0 10px 0"
+          @click="routeToRegister"
+        >
+          点击注册
+        </el-link>
       </el-col>
     </el-row>
-
-    <el-checkbox style="margin: 0 0 25px 0" v-model="loginForm.rememberMe"
-      >记住密码
-    </el-checkbox>
     <el-form-item style="width: 100%">
       <el-button
         size="large"
@@ -84,51 +76,30 @@ import { onMounted, ref } from "vue";
 import requestUtil from "@/utils/request";
 import qs from "qs";
 import { ElMessage } from "element-plus";
-import Cookies from "js-cookie";
-import { encrypt, decrypt } from "@/utils/jsencrypt";
 import router from "@/router";
 
 const loginRef = ref(null);
 
 const loginForm = ref({
-  username: "",
-  password: "",
-  rememberMe: false,
+  userPhoneNum: "",
+  smsCode: "",
 });
 
-const code = ref("");
-// "http://localhost:9000/api/captcha/code?time=" + new Date()
-// 存放验证码图片的Base64格式数据
-const captchaImageUrl = ref("");
-const uuid = ref("");
-const getCaptcha = async () => {
-  requestUtil.get("/captcha/code").then((res: any) => {
-    console.log(res.data);
-    if (res.data.code === 0) {
-      uuid.value = res.data.data.uuid;
-      captchaImageUrl.value = res.data.data.img;
-    }
-  });
-};
-getCaptcha();
-
 const loginRules = {
-  username: [
-    { required: true, trigger: "change", message: "请输入您的用户名" },
+  userPhoneNum: [
+    { required: true, trigger: "blur", message: "请输入你的手机号" },
     {
-      min: 4,
-      max: 8,
-      message: "账号长度必须大于4位并且小于8位",
-      trigger: "trigger",
+      pattern: /^1[3456789]\d{9}$/,
+      message: "手机号码格式不正确",
+      trigger: "blur",
     },
   ],
-  password: [
-    { required: true, trigger: "change", message: "请输入您的密码" },
+  smsCode: [
+    { required: false, trigger: "blur", message: "请输入你的验证码" },
     {
-      min: 4,
-      max: 8,
-      message: "账号长度必须大于4位并且小于8位",
-      trigger: "trigger",
+      len: 6,
+      message: "请输入6位验证码",
+      trigger: "blur",
     },
   ],
 };
@@ -137,23 +108,8 @@ const handleLogin = () => {
   if (loginRef.value != null) {
     loginRef.value.validate(async (valid: any) => {
       if (valid) {
-        // 记住密码,30天
-        if (loginForm.value.rememberMe) {
-          Cookies.set("username", loginForm.value.username, { expires: 30 });
-          Cookies.set("password", encrypt(loginForm.value.password), {
-            expires: 30,
-          });
-          Cookies.set("rememberMe", loginForm.value.rememberMe, {
-            expires: 30,
-          });
-        } else {
-          Cookies.remove("username");
-          Cookies.remove("password");
-          Cookies.remove("rememberMe");
-        }
-        let res = await requestUtil.post(
-          `login?code=${code.value}&uuid=${uuid.value}&` +
-            qs.stringify(loginForm.value)
+        const res = await requestUtil.post(
+          `/phoneLogin?` + qs.stringify(loginForm.value)
         );
         if (res.data.code === 0) {
           ElMessage.success("登录成功");
@@ -172,23 +128,27 @@ const handleLogin = () => {
   }
 };
 
-function getCookie() {
-  const username = Cookies.get("username");
-  const password = Cookies.get("password");
-  const rememberMe = Cookies.get("rememberMe");
-  loginForm.value = {
-    username: username === undefined ? loginForm.value.username : username,
-    password:
-      password === undefined ? loginForm.value.password : decrypt(password),
-    rememberMe: rememberMe === undefined ? false : Boolean(rememberMe),
-  };
-}
+// 发送验证码
+const handleSendSmsCode = async () => {
+  if (loginRef.value != null) {
+    loginRef.value.validate(async (valid: any) => {
+      if (valid) {
+        requestUtil
+          .get("/sms/smsCode?phone=" + loginForm.value.userPhoneNum)
+          .then((res: any) => {
+            if (res.data.code === 0) {
+              ElMessage.success("验证码已经发出，请注意查收");
+            }
+            ElMessage.error(res.data.message);
+          });
+      }
+    });
+  }
+};
 
-getCookie();
-
-// onMounted(() => {
-//   getCaptcha();
-// });
+const routeToRegister = async () => {
+  await router.push("/register");
+};
 </script>
 
 <style lang="css" scoped>

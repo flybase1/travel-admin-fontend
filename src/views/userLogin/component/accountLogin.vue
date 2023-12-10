@@ -27,17 +27,56 @@
         autocomplete="off"
         placeholder="密码"
         @keyup.enter="handleLogin"
-        clearable
         show-password
       >
+        <template #suffix>
+          <el-link href="#" style="color: cornflowerblue"> 忘记密码</el-link>
+        </template>
         <template #prefix>
           <svg-icon icon="password"></svg-icon>
         </template>
       </el-input>
     </el-form-item>
-    <el-checkbox style="margin: 0 0 25px 0" v-model="loginForm.rememberMe"
-      >记住密码
-    </el-checkbox>
+    <el-row>
+      <el-col :span="8">
+        <el-form-item prop="code">
+          <el-input
+            v-model="code"
+            type="text"
+            size="large"
+            autocomplete="off"
+            placeholder="输入验证码"
+            @keyup.enter="handleLogin"
+            clearable
+          >
+          </el-input>
+        </el-form-item>
+      </el-col>
+      <el-col :span="3" />
+      <el-col :span="6">
+        <div class="input-box">
+          <img :src="captchaImageUrl" @click="getCaptcha" alt="验证码" />
+        </div>
+      </el-col>
+    </el-row>
+
+    <el-row>
+      <el-col :span="4">
+        <el-checkbox style="margin: 0 0 25px 0" v-model="loginForm.rememberMe">
+          记住密码
+        </el-checkbox>
+      </el-col>
+      <el-col :span="16" />
+      <el-col :span="4" class="text-right">
+        <router-link
+          to="/register"
+          style="color: cornflowerblue; margin: 0 0 10px 0"
+        >
+          点击注册
+        </router-link>
+      </el-col>
+    </el-row>
+
     <el-form-item style="width: 100%">
       <el-button
         size="large"
@@ -70,9 +109,24 @@ const loginForm = ref({
 });
 
 const loginRules = {
-  username: [{ required: true, trigger: "blur", message: "请输入你的密码" }],
+  username: [{ required: true, trigger: "blur", message: "请输入你的账号" }],
   password: [{ required: true, trigger: "blur", message: "请输入你的密码" }],
 };
+
+const code = ref("");
+// 存放验证码图片的Base64格式数据
+const captchaImageUrl = ref("");
+const uuid = ref("");
+const getCaptcha = async () => {
+  requestUtil.get("/captcha/code").then((res: any) => {
+    console.log(res.data);
+    if (res.data.code === 0) {
+      uuid.value = res.data.data.uuid;
+      captchaImageUrl.value = res.data.data.img;
+    }
+  });
+};
+getCaptcha();
 
 const handleLogin = () => {
   if (loginRef.value != null) {
@@ -93,7 +147,8 @@ const handleLogin = () => {
           Cookies.remove("rememberMe");
         }
         let res = await requestUtil.post(
-          "login?" + qs.stringify(loginForm.value)
+          `login?code=${code.value}&uuid=${uuid.value}&` +
+            qs.stringify(loginForm.value)
         );
         if (res.data.code === 0) {
           ElMessage.success("登录成功");
@@ -126,6 +181,10 @@ function getCookie() {
 }
 
 getCookie();
+
+const routeToRegister = async () => {
+  await router.push("/register");
+};
 </script>
 
 <style lang="css" scoped>

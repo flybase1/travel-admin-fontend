@@ -3,7 +3,7 @@ import store from "@/store";
 
 router.beforeEach((to, from, next) => {
   // 白名单
-  const whiteList = ["/login", "/", "/index"];
+  const whiteList = ["/login", "/", "/index", "/register"];
   // 获取token
   const token = store.getters.GET_TOKEN;
   // 路由
