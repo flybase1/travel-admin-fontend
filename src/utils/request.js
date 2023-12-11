@@ -33,7 +33,7 @@ httpService.interceptors.request.use(
     config.headers.token = sessionStorage.getItem("token");
     /*console.log("store=" + store.GET_TOKEN)*/
     /*console.log("store="+store.GET_TOKEN)
-                                                                                            config.headers.token=store.GET_TOKEN*/
+                                                                                                            config.headers.token=store.GET_TOKEN*/
     return config;
   },
   function (error) {
@@ -126,6 +126,33 @@ export function post(url, params = {}) {
   });
 }
 
+/*
+ *  post请求发送json数据
+ *  url:请求地址
+ *  params:参数
+ * */
+export function postJson(url, params = {}) {
+  return new Promise((resolve, reject) => {
+    httpService({
+      url: url,
+      method: "post",
+      data: params,
+      headers: {
+        "Content-Type": "application/json",
+        // Add other headers if needed
+      },
+    })
+      .then((response) => {
+        console.log(response);
+        resolve(response);
+      })
+      .catch((error) => {
+        console.log(error);
+        reject(error);
+      });
+  });
+}
+
 export function put(url, params = {}) {
   return new Promise((resolve, reject) => {
     httpService({
@@ -191,6 +218,7 @@ export function getServerUrl() {
 export default {
   get,
   post,
+  postJson,
   put,
   deleteR,
   fileUpload,

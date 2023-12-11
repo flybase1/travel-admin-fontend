@@ -36,8 +36,12 @@
           </el-input>
         </el-col>
         <el-col :span="6">
-          <el-button @click="handleSendSmsCode" type="primary"
-            >发送验证码
+          <el-button
+            @click="handleSendSmsCode"
+            :disabled="!canClick"
+            type="primary"
+          >
+            发送验证码
           </el-button>
         </el-col>
       </el-row>
@@ -79,6 +83,8 @@ import { ElMessage } from "element-plus";
 import router from "@/router";
 
 const loginRef = ref(null);
+
+const canClick = ref(true);
 
 const loginForm = ref({
   userPhoneNum: "",
@@ -137,9 +143,11 @@ const handleSendSmsCode = async () => {
           .get("/sms/smsCode?phone=" + loginForm.value.userPhoneNum)
           .then((res: any) => {
             if (res.data.code === 0) {
+              canClick.value = false;
               ElMessage.success("验证码已经发出，请注意查收");
+            } else {
+              ElMessage.error(res.data.message);
             }
-            ElMessage.error(res.data.message);
           });
       }
     });

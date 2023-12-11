@@ -11,7 +11,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "/index",
         name: "首页",
-        component: () => import("../views/index/index.vue"),
+        component: () => import("../views/user/index/MainIndex.vue"),
       },
       {
         path: "/userCenter",

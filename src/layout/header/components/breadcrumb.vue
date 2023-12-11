@@ -19,12 +19,12 @@
 import { HomeFilled } from "@element-plus/icons-vue";
 import store from "@/store";
 import { ref, watch } from "vue";
-import { useRoute } from "vue-router";
+import { RouteLocationMatched, useRoute } from "vue-router";
 import router from "@/router";
 
 const route = useRoute();
-const breadcrumbList = ref<[]>([]);
-const parentName = ref(null);
+const breadcrumbList = ref<RouteLocationMatched[]>([]);
+const parentName = ref<string>("");
 const doInitBreadCrumbList = () => {
   breadcrumbList.value = route.matched;
   parentName.value = route.meta.parentName;

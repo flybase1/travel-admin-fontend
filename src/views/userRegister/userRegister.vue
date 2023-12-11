@@ -114,6 +114,7 @@ import store from "@/store";
 import router from "@/router";
 import requestUtil from "@/utils/request";
 import qs from "qs";
+import axios from "axios";
 
 const registerRef = ref(null);
 
@@ -159,10 +160,11 @@ const registerRules = {
 
 const handleRegister = () => {
   if (registerRef.value != null) {
-    registerForm.value.validate(async (valid: any) => {
+    registerRef.value.validate(async (valid: any) => {
       if (valid) {
-        const res = await requestUtil.post(
-          `/account/userRegister?` + qs.stringify(registerForm.value)
+        const res = await requestUtil.postJson(
+          `/account/userRegister`,
+          JSON.stringify(registerForm.value)
         );
         if (res.data.code === 0) {
           ElMessage.success("注册成功，前往登录");

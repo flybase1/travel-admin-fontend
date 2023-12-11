@@ -6,6 +6,7 @@
       class="el-menu-vertical-demo"
       :default-active="'/index'"
       text-color="#fff"
+      :collapse="isCollapse"
       router
       @open="handleOpen"
       @close="handleClose"
@@ -47,6 +48,7 @@
 </template>
 
 <script setup lang="ts">
+const isCollapse = ref(false);
 import { HomeFilled } from "@element-plus/icons-vue";
 import { ref, watch } from "vue";
 import store from "@/store";
@@ -73,6 +75,10 @@ watch(
   },
   { deep: true, immediate: true }
 );
+
+const handleCollapse = () => {
+  isCollapse.value = !isCollapse.value;
+};
 </script>
 
 <style lang="scss" scoped>

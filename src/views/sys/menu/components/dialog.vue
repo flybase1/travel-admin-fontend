@@ -116,7 +116,7 @@ const form = ref({
 });
 
 const rules = ref({
-  parentId: [{ required: true, message: "请选择上级菜单" }],
+  parentId: [{ required: false, message: "请选择上级菜单" }],
   menuName: [{ required: true, message: "菜单名称不能为空", trigger: "blur" }],
 });
 
