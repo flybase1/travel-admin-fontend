@@ -35,67 +35,93 @@
 
         <el-col :span="16">
           <div class="mainContent">
-            <el-card>
-              <el-row :gutter="20">
-                <el-col
-                  :span="24"
+            <el-row :gutter="10">
+              <el-col :span="24">
+                <el-card
                   v-for="item in travelList"
                   :key="item.travelId"
+                  style="padding-top: 10px"
+                  @click="handleClickTravelInfo(item.travelId)"
+                  shadow="hover"
                 >
-                  <el-card>
-                    <el-row :gutter="10">
-                      <el-col :span="5">
-                        <el-image
-                          :src="item.coverPictureUrl"
-                          style="width: 160px; height: 140px"
-                        />
-                      </el-col>
-                      <el-col :span="12">
-                        <el-row>
-                          <h2>{{ item.travelTitle }}</h2>
-                        </el-row>
-                        <el-row>
-                          <el-tag>
-                            {{ item.travelType }}
-                          </el-tag>
-                        </el-row>
-                        <el-row>
-                          <el-rate v-model="item.travelScore"></el-rate>
-                        </el-row>
-                        <el-row>
-                          ¥
-                          <el-text size="large" style="color: red; float: right"
-                            >{{ item.travelPrice }}
+                  <el-row :gutter="5">
+                    <el-col :span="5">
+                      <el-image
+                        :src="item.coverPictureUrl"
+                        style="width: 160px; height: 140px"
+                      />
+                    </el-col>
+                    <el-col :span="19">
+                      <el-row>
+                        <h2>{{ item.travelTitle }}</h2>
+                      </el-row>
+                      <el-row>
+                        <el-tag>
+                          {{ item.travelType }}
+                        </el-tag>
+                      </el-row>
+                      <el-row :gutter="5" style="padding-top: 10px">
+                        <el-space spacer="|" size="large">
+                          <el-col>
+                            <el-rate
+                              v-model="item.travelScore"
+                              :disabled="true"
+                            ></el-rate>
+                          </el-col>
+                          <el-col>
+                            <el-text> 可定 {{ item.travelNumbers }} 人</el-text>
+                          </el-col>
+                          <el-col>
+                            <el-text>开始时间 {{ item.beginTime }}</el-text>
+                          </el-col>
+                        </el-space>
+                      </el-row>
+                      <el-row>
+                        <el-col :span="18"></el-col>
+                        <el-col :span="6">
+                          <el-text
+                            size="large"
+                            style="color: red; float: right; font-size: 20px"
+                            >¥{{ item.travelPrice }}
                           </el-text>
-                          起
-                        </el-row>
-                      </el-col>
-                    </el-row>
-                  </el-card>
-                </el-col>
-              </el-row>
-            </el-card>
+                        </el-col>
+                      </el-row>
+                    </el-col>
+                  </el-row>
+                </el-card>
+              </el-col>
+            </el-row>
           </div>
         </el-col>
+        <el-col :span="4" />
       </el-row>
     </div>
     <div class="footer">
-      <el-pagination
-        v-model:current-page="currentPage"
-        v-model:page-size="pageSize"
-        :small="small"
-        :disabled="disabled"
-        :background="background"
-        layout="prev, pager, next, jumper"
-        :total="1000"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-      />
+      <el-row>
+        <el-col :span="6"></el-col>
+        <el-col :span="10">
+          <el-pagination
+            v-model:current-page="currentPage"
+            v-model:page-size="pageSize"
+            :small="small"
+            :disabled="disabled"
+            :background="background"
+            style="font-size: 14px"
+            layout="prev, pager, next, jumper"
+            :total="1000"
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+          />
+        </el-col>
+        <el-col :span="8"></el-col>
+      </el-row>
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import { ref } from "vue";
+import { ElMessage } from "element-plus";
+import router from "@/router";
 
 const currentPage = ref(1);
 const pageSize = ref(100);
@@ -110,6 +136,7 @@ const travel = ref({
   travelScore: "",
   travelPrice: "",
   travelType: "",
+  travelNumbers: "",
   beginTime: "",
 });
 
@@ -122,6 +149,7 @@ const travelList = ref([
     travelScore: 4.3,
     travelPrice: 192,
     travelType: "团队游",
+    travelNumbers: 12,
     beginTime: "2023/12/11",
   },
   {
@@ -132,6 +160,7 @@ const travelList = ref([
     travelScore: 4.3,
     travelPrice: 192,
     travelType: "团队游",
+    travelNumbers: 12,
     beginTime: "2023/12/11",
   },
   {
@@ -142,6 +171,7 @@ const travelList = ref([
     travelScore: 4.3,
     travelPrice: 192,
     travelType: "团队游",
+    travelNumbers: 12,
     beginTime: "2023/12/11",
   },
   {
@@ -152,6 +182,7 @@ const travelList = ref([
     travelScore: 4.3,
     travelPrice: 192,
     travelType: "团队游",
+    travelNumbers: 12,
     beginTime: "2023/12/11",
   },
   {
@@ -162,6 +193,7 @@ const travelList = ref([
     travelScore: 4.3,
     travelPrice: 192,
     travelType: "团队游",
+    travelNumbers: 12,
     beginTime: "2023/12/11",
   },
   {
@@ -172,6 +204,7 @@ const travelList = ref([
     travelScore: 4.3,
     travelPrice: 192,
     travelType: "团队游",
+    travelNumbers: 12,
     beginTime: "2023/12/11",
   },
   {
@@ -182,6 +215,7 @@ const travelList = ref([
     travelScore: 4.3,
     travelPrice: 192,
     travelType: "团队游",
+    travelNumbers: 12,
     beginTime: "2023/12/11",
   },
 ]);
@@ -191,6 +225,11 @@ const handleSizeChange = (val: number) => {
 };
 const handleCurrentChange = (val: number) => {
   console.log(`current page: ${val}`);
+};
+
+const handleClickTravelInfo = async (id: number) => {
+  await router.push(`/travelInfo/${id}`);
+  // ElMessage.success("点击了旅游" + id);
 };
 </script>
 
@@ -205,9 +244,5 @@ const handleCurrentChange = (val: number) => {
 
 .mainContent {
   width: 100%;
-}
-
-.footer {
-  float: right;
 }
 </style>
