@@ -79,7 +79,7 @@
                 <el-input v-model="formData.travelUserPhoneNum"></el-input>
               </el-form-item>
               <el-form-item>
-                <el-button type="primary">提交</el-button>
+                <el-button type="primary" @click="handleSubmit">提交</el-button>
               </el-form-item>
             </el-form>
           </el-col>
@@ -116,7 +116,15 @@
                   ""
                 }}
               </el-text>
-              <el-text size="large" class="rightContentInputText">
+              <el-text
+                size="large"
+                style="padding-left: 10px; color: white; padding-top: 20px"
+                >至
+              </el-text>
+              <el-text
+                size="large"
+                style="padding-left: 20px; color: white; padding-top: 20px"
+              >
                 {{
                   (formData.travelEndTime &&
                     formatDate(formData.travelEndTime)) ||
@@ -190,7 +198,7 @@ const formData = ref({
   travelNumbers: 1,
   travelMoney: "",
   travelEstimation: "",
-  travelGuideNums: "",
+  travelGuideNums: 1,
   travelDescription: "",
   travelUserName: "",
   travelUserPhoneNum: "",
@@ -234,6 +242,7 @@ const formRules = ref({
     {
       min: 1,
       max: 100,
+      trigger: "change",
       message: "人数范围1-100",
     },
   ],
@@ -246,10 +255,45 @@ const formRules = ref({
     {
       min: 0,
       max: 999999,
+      trigger: "change",
       message: "费用在0-999999之间",
     },
   ],
+  travelUserName: [
+    {
+      required: true,
+      message: "联系人姓名不能为空",
+      trigger: ["blur", "change"],
+    },
+  ],
+  travelUserPhoneNum: [
+    {
+      required: true,
+      message: "手机号码不能为空",
+      trigger: "blur",
+    },
+    {
+      pattern: /^1[3|4|5|6|7|8|9][0-9]\d{8}$/,
+      message: "请输入正确的手机号码",
+      trigger: "blur",
+    },
+  ],
+  travelGuideNums: [
+    {
+      required: true,
+      message: "导游人数不能为空",
+      trigger: ["blur", "change"],
+    },
+    {
+      min: 1,
+      max: 10,
+      trigger: "change",
+      message: "导游人数必须为1-10位",
+    },
+  ],
 });
+
+const handleSubmit = async () => {};
 </script>
 
 <style scoped lang="scss">

@@ -26,11 +26,11 @@
     <div class="content">
       <el-row :gutter="20">
         <el-col :span="4">
-          <div class="leftContent">
-            <el-card>
-              <el-card v-for="o in 8" key="o">南通{{ o }}日游</el-card>
-            </el-card>
-          </div>
+          <!--          <div class="leftContent">-->
+          <!--            <el-card>-->
+          <!--              <el-card v-for="o in 8" key="o">南通{{ o }}日游</el-card>-->
+          <!--            </el-card>-->
+          <!--          </div>-->
         </el-col>
 
         <el-col :span="16">
